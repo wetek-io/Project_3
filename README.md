@@ -20,3 +20,11 @@ perfect day.
 # CI/CD
 
 # Env Reset
+
+```bash
+conda deactivate
+conda deactivate
+conda env remove --name=project_3 -y
+conda env create -f environment.yml -y
+conda activate project_3
+```

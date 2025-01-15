@@ -1,0 +1,90 @@
+"""
+	All the utilities for the VGTO (Virtual Gown Try on)
+  Please refer to white paper for guidance 
+"""
+
+import torch
+import torch.nn as nn
+from torch.utils.data import Dataset
+from PIL import Image
+
+
+def resize(image, dimensions):
+    img_resize = image.resize(dimensions)
+    return img_resize
+
+
+class UNet(nn.Module):
+    """
+    Convolution Neural Network
+    """
+
+    def __init__(self, in_channels=1, out_channels=1):
+        super(UNet, self).__init__()
+        # Encoder
+        self.enc1 = self.conv_block(in_channels, 64)
+        self.enc2 = self.conv_block(64, 128)
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
+
+        # Bottleneck
+        self.bottleneck = self.conv_block(128, 256)
+
+        # Decoder
+        self.upconv2 = nn.ConvTranspose2d(256, 128, kernel_size=2, stride=2)
+        self.dec2 = self.conv_block(256, 128)
+        self.upconv1 = nn.ConvTranspose2d(128, 64, kernel_size=2, stride=2)
+        self.dec1 = self.conv_block(128, 64)
+
+        # Final Convolution
+        self.final_conv = nn.Conv2d(64, out_channels, kernel_size=1)
+
+    def conv_block(self, in_channels, out_channels):
+        return nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+        )
+
+    def forward(self, x):
+        # Encoder
+        enc1 = self.enc1(x)
+        enc2 = self.enc2(self.pool(enc1))
+
+        # Bottleneck
+        bottleneck = self.bottleneck(self.pool(enc2))
+
+        # Decoder
+        dec2 = self.upconv2(bottleneck)
+        dec2 = self.dec2(torch.cat([dec2, enc2], dim=1))
+        dec1 = self.upconv1(dec2)
+        dec1 = self.dec1(torch.cat([dec1, enc1], dim=1))
+
+        # Output
+        return self.final_conv(dec1)
+
+
+class SegmentationDataset(Dataset):
+    def __init__(self, img_dir, mask_dir, transform=None):
+        self.img_dir = img_dir
+        self.mask_dir = mask_dir
+        self.transform = transform
+        self.imgs = os.listdir(img_dir)
+
+    def __len__(self):
+        return len(self.imgs)
+
+    def __getitem__(self, idx) -> tuple[torch.Tensor, torch.Tensor]:
+        img_path = os.path.join(self.img_dir, self.imgs[idx])
+        mask_path = os.path.join(self.img_dir, self.imgs[idx])
+
+        image = Image.open(img_path).convert("RGB")
+        mask = Image.open(mask_path).convert("L")
+
+        image = resize(image, (256, 256))
+        mask = resize(mask, (256, 256))
+
+        image_tsr = torch.from_numpy(np.array(image)).permute(2, 0, 1).float() / 255.0
+        mask_tsr = torch.from_numpy(np.array(mask)).unsqueeze(0).float() / 255.0
+
+        return image_tsr, mask_tsr

@@ -16,9 +16,10 @@ maintain gown detail in the final generation.
 
 This is a multi(3) model application.
 
-- Segmentation (DeepLabv3+ or U-Net):
+- Segmentation (U-Net):
 
   - identify which segments of the image are the model(human) and the gown it self
+  - U-net'a [architecture](https://arxiv.org/pdf/1505.04597v1) is based off the convolution neural network. Purposely design for segmenting biomedical images such as tumor detection
 
 - Pose Evaluation (OpenPose or MediaPipe Pose):
 
@@ -62,6 +63,26 @@ perfect day.
 - Visualization and debugging
   - Visualization is handled by matplotlib or saved as images
 
+## User Experience
+
+Example Flow Visualization 1.
+
+- Welcome Screen:
+  - Title:
+    - “Welcome to the Image Segmentation Tool!”
+  - Button:
+    - “Get Started”
+  - Upload:
+    - Drag-and-drop or click to upload.
+  - Preview:
+    - Uploaded image is shown.
+  - Results:
+    - Spinner with “Processing…” message.
+    - Display image of bride in dress.
+    - Option to download or share.
+  - Next Steps:
+    - “Upload Another” or “Try Advanced Tools.”
+
 ## Deployment
 
 ## CI/CD
@@ -72,10 +93,25 @@ perfect day.
 conda deactivate
 conda deactivate
 conda env remove --name=project_3 -y
-conda env create -f environment.yml -y
+conda env create -f env.yml -y
 conda activate project_3
 ```
 
 ### Developer Notes:
 
 Project development data: [Zander](https://www.maggiesottero.com/sottero-and-midgley/zander/11869)
+
+### Research:
+
+- [virtual-gown-tryon (A previous personal project)](https://github.com/steven-midgley/virtual-gown-tryon)
+
+- [LIP(Look Into Person)](https://www.sysu-hcp.net/lip/index.php) - A large scale dataset for the sematic understanding of person
+
+- [DeepLabv3+](https://github.com/tensorflow/models/tree/master/research/deeplab)
+
+- [U-Net](https://github.com/milesial/Pytorch-UNet)
+
+  - [U-Net White paper](https://arxiv.org/pdf/1505.04597v1)
+  - [The U-Net: A complete guide (Medium)]: (https://medium.com/@alejandro.itoaramendia/decoding-the-u-net-a-complete-guide-810b1c6d56d8#https://medium.com/@alejandro.itoaramendia/convolutional-neural-networks-cnns-a-complete-guide-a803534a1930)
+
+- [Convolutional Image Segmentation](https://arxiv.org/pdf/1706.05587v3)

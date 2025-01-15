@@ -37,7 +37,7 @@ class UNet(nn.Module):
 
         # Final Convolution
         self.final_conv = nn.Conv2d(64, out_channels, kernel_size=1)
-        self.activation = nn.Sigmoid()  # Binary segmentation
+        self.activation = nn.Sigmoid()
 
     def conv_block(self, in_channels, out_channels):
         return nn.Sequential(
@@ -66,11 +66,11 @@ class UNet(nn.Module):
 
 
 class SegmentationDataset(Dataset):
-    def __init__(self, img_dir=[], mask_dir=[], transform=None):
+    def __init__(self, img_dir, mask_dir, transform=None):
         self.img_dir = img_dir
         self.mask_dir = mask_dir
         self.transform = transform
-        self.img_len = (self.img_dir, self.mask_dir)
+        self.img_len = os.listdir(self.img_dir)
 
     def __len__(self):
         return len(self.img_len)

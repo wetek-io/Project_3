@@ -20,7 +20,7 @@ perfect day.
   - Resize images and masks to a fixed size (e.g., 250x250).
   - Convert images and masks to PyTorch tensors for use in the model.
 - Modeling
-- Build a segmentation model with two output channels (user, gown)
+  - Build a segmentation model with two output channels (user, gown)
   - Maintain consistent spacial dimensions with appropriate convolution layer padding
 - Training
   - Load data with PyTorch DataLoader

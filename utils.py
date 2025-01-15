@@ -1,25 +1,25 @@
 """
-	All the utilities for the VGTO (Virtual Gown Try on)
-  Please refer to white paper for guidance 
+Utilities for VGTO (Virtual Gown Try-On)
+Refer to white paper for guidance.
 """
 
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset
 from PIL import Image
+import numpy as np
+import os
+from torchvision import transforms
 
 
-def resize(image, dimensions):
-    img_resize = image.resize(dimensions)
-    return img_resize
+def resize(image: Image.Image, dimensions: tuple[int, int]) -> Image.Image:
+    return image.resize(dimensions)
 
 
 class UNet(nn.Module):
-    """
-    Convolution Neural Network
-    """
+    """U-Net Convolutional Neural Network"""
 
-    def __init__(self, in_channels=1, out_channels=1):
+    def __init__(self, in_channels=3, out_channels=1):
         super(UNet, self).__init__()
         # Encoder
         self.enc1 = self.conv_block(in_channels, 64)
@@ -37,6 +37,7 @@ class UNet(nn.Module):
 
         # Final Convolution
         self.final_conv = nn.Conv2d(64, out_channels, kernel_size=1)
+        self.activation = nn.Sigmoid()  # Binary segmentation
 
     def conv_block(self, in_channels, out_channels):
         return nn.Sequential(
@@ -61,30 +62,33 @@ class UNet(nn.Module):
         dec1 = self.dec1(torch.cat([dec1, enc1], dim=1))
 
         # Output
-        return self.final_conv(dec1)
+        return self.activation(self.final_conv(dec1))
 
 
 class SegmentationDataset(Dataset):
-    def __init__(self, img_dir, mask_dir, transform=None):
+    def __init__(self, img_dir=[], mask_dir=[], transform=None):
         self.img_dir = img_dir
         self.mask_dir = mask_dir
         self.transform = transform
-        self.imgs = os.listdir(img_dir)
+        self.img_len = (self.img_dir, self.mask_dir)
 
     def __len__(self):
-        return len(self.imgs)
+        return len(self.img_len)
 
     def __getitem__(self, idx) -> tuple[torch.Tensor, torch.Tensor]:
-        img_path = os.path.join(self.img_dir, self.imgs[idx])
-        mask_path = os.path.join(self.img_dir, self.imgs[idx])
+        img_path = os.path.join(self.img_dir, self.img_len[idx])
+        mask_path = os.path.join(self.mask_dir, self.img_len[idx])
 
         image = Image.open(img_path).convert("RGB")
         mask = Image.open(mask_path).convert("L")
 
-        image = resize(image, (256, 256))
-        mask = resize(mask, (256, 256))
+        if self.transform:
+            image = self.transform(image)
+            mask = self.transform(mask)
+        else:
+            image = resize(image, (256, 256))
+            mask = resize(mask, (256, 256))
+            image = torch.from_numpy(np.array(image)).permute(2, 0, 1).float() / 255.0
+            mask = torch.from_numpy(np.array(mask)).unsqueeze(0).float() / 255.0
 
-        image_tsr = torch.from_numpy(np.array(image)).permute(2, 0, 1).float() / 255.0
-        mask_tsr = torch.from_numpy(np.array(mask)).unsqueeze(0).float() / 255.0
-
-        return image_tsr, mask_tsr
+        return image, mask

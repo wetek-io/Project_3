@@ -23,12 +23,11 @@ class CNN(nn.Module):
         Convolution Neural Network
         """
         super(CNN, self).__init__()
-        self.conv1 = nn.Conv2d(
-            1, 32, 3, 1
-        )  # 1 input channel, 32 conv_features, 1 kernel size 3
-        self.conv2 = nn.Conv2d(
-            32, 64, 3, 1
-        )  # 32 input layers, 64 conv_features, 1 kernel size 3
+        # 3 input channel, 32 conv_features, 1 kernel size 3
+        self.conv1 = nn.Conv2d(3, 32, 3, 1)
+
+        # 32 input layers, 64 conv_features, 1 kernel size 3
+        self.conv2 = nn.Conv2d(32, 64, 3, 1)
 
         # Ensure adjacent pixels are 0 or active
         self.dropout1 = nn.Dropout(0.25)
@@ -46,17 +45,18 @@ class CNN(nn.Module):
 
         # rectified-linear function activation
         x = F.relu(x)
-        x = self.conv2(x)
+        x = self.conv2(x)  # 32 inputs, 64 features, 1x3 kernel
         x = F.relu(x)
 
-        # Max pool over x
-        x = F.max_pool2d(x, 2)
+        # Max pool over x set kernels
+        x = F.max_pool2d(x, kernel_size=2)
         x = self.dropout1(x)
 
         # Flatten x to 1 dim
         x = torch.flatten(x, 1)
         x = self.fc1(x)
         x = F.relu(x)
+
         x = self.dropout2(x)
         x = self.fc2(x)
 
@@ -114,7 +114,12 @@ class UNet(nn.Module):
         return self.activation(self.final_conv(dec1))
 
 
-class SegmentationDataset(Dataset):
+class SegmentDataset(Dataset):
+    """
+    Prepare data for segmentation
+    Dataset: (images/, masks/)
+    Return: image, mask
+    """
 
     def __init__(self, img_dir, mask_dir, transform=None):
         self.img_dir = img_dir
@@ -126,13 +131,19 @@ class SegmentationDataset(Dataset):
         return len(self.img_len)
 
     def __getitem__(self, idx) -> tuple[torch.Tensor, torch.Tensor]:
+        # Set paths to image data directories
         img_path = os.path.join(self.img_dir, self.img_len[idx])
         mask_path = os.path.join(self.mask_dir, self.img_len[idx])
 
-        image = resize(Image.open(img_path).convert("RGB"), (156, 56))
-        mask = resize(Image.open(mask_path).convert("L"), (156, 56))
+        # Resize image
+        image = resize(Image.open(img_path).convert("RGB"), (96, 156))
+        mask = resize(Image.open(mask_path).convert("L"), (96, 156))
+
+        # Save resized image
         image.save(img_path)
         mask.save(mask_path)
+
+        # Turn image into tensor data
         image = torch.from_numpy(np.array(image)).permute(2, 0, 1).float() / 255.0
         mask = torch.from_numpy(np.array(mask)).unsqueeze(0).float() / 255.0
 

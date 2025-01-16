@@ -23,43 +23,38 @@ class CNN(nn.Module):
         Convolution Neural Network
         """
         super(CNN, self).__init__()
-        # 3 input channel, 32 conv_features, 3 kernel size 3
-        self.conv1 = nn.Conv2d(3, 32, 2, 3)
 
-        # 32 input layers, 64 conv_features, 3 kernel size 3
-        self.conv2 = nn.Conv2d(32, 64, 2, 3)
+        # Convolution layers
+        self.conv1 = nn.Conv2d(3, 6, 3)
+        self.conv2 = nn.Conv2d(6, 16, 3)
 
-        # Ensure adjacent pixels are 0 or active
+        # Drop outs
         self.dropout1 = nn.Dropout(0.25)
         self.dropout2 = nn.Dropout(0.5)
 
-        # Full connect layer 1
-        self.fc1 = nn.Linear(32, 64)
+        # MaxPool
+        self.pool = nn.MaxPool2d(2, 2)
 
-        # Full connect layer 2 with 10 output labels
+        # Full connect layer 1
+        dummy_input = torch.zeros(1, 3, 32, 32)
+        flattened_size = self._get_flattened_size(dummy_input)
+        self.fc1 = nn.Linear(flattened_size, 32)
         self.fc2 = nn.Linear(32, 10)
 
+    def _get_flattened_size(self, x):
+        """Perform a forward pass through conv/pool layers to compute flattened size."""
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
+        return x.numel()
+
     def forward(self, x):
-        # rectified-linear function activation and run x through first convolution layer
-        x = F.relu(self.conv1(x))
-
-        # rectified-linear function activation and run x through second convolution layer
-        x = F.relu(self.conv2(x))
-
-        # Max pool over x set kernels
-        x = F.max_pool2d(x, kernel_size=2)
-        x = self.dropout1(x)
-
-        print(x.shape)
-        # Flatten x to 1 dim
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
         x = torch.flatten(x, 1)
-        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc1(self.dropout1(x)))
+        x = self.fc2(self.dropout2(x))
 
-        x = self.dropout2(x)
-        x = self.fc2(x)
-
-        output = F.log_softmax(x, dim=1)
-        return output
+        return F.log_softmax(x, dim=1)
 
 
 class UNet(nn.Module):
@@ -137,9 +132,9 @@ class SegmentDataset(Dataset):
         image = resize(Image.open(img_path).convert("RGB"), (96, 156))
         mask = resize(Image.open(mask_path).convert("L"), (96, 156))
 
-        # Save resized image
-        image.save(img_path)
-        mask.save(mask_path)
+        # Save resized image (optional)
+        # image.save(img_path)
+        # mask.save(mask_path)
 
         # Turn image into tensor data
         image = torch.from_numpy(np.array(image)).permute(2, 0, 1).float() / 255.0

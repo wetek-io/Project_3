@@ -169,3 +169,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Misc
+*.gz
+SA1B_Meta_AI_Segmentation_Dataset

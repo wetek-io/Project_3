@@ -10,57 +10,26 @@ import torch.nn as nn
 from PIL import Image
 import numpy as np
 import torch
+import json
+import cv2
 import os
+
+TRANSFORM = transforms.Compose([transforms.Resize((128, 128)), transforms.ToTensor()])
 
 
 def resize(image: Image.Image, dimensions: tuple[int, int]) -> Image.Image:
     return image.resize(dimensions)
 
 
-class CNN(nn.Module):
-    def __init__(self):
-        """
-        Convolution Neural Network
-        """
-        super(CNN, self).__init__()
-
-        # Convolution layers
-        self.conv1 = nn.Conv2d(3, 6, 3)
-        self.conv2 = nn.Conv2d(6, 16, 3)
-
-        # Drop outs
-        self.dropout1 = nn.Dropout(0.25)
-        self.dropout2 = nn.Dropout(0.5)
-
-        # MaxPool
-        self.pool = nn.MaxPool2d(2, 2)
-
-        # Full connect layer 1
-        dummy_input = torch.zeros(1, 3, 32, 32)
-        flattened_size = self._get_flattened_size(dummy_input)
-        self.fc1 = nn.Linear(flattened_size, 32)
-        self.fc2 = nn.Linear(32, 10)
-
-    def _get_flattened_size(self, x):
-        """Perform a forward pass through conv/pool layers to compute flattened size."""
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        return x.numel()
-
-    def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = torch.flatten(x, 1)
-        x = F.relu(self.fc1(self.dropout1(x)))
-        x = self.fc2(self.dropout2(x))
-
-        return F.log_softmax(x, dim=1)
-
-
 class UNet(nn.Module):
     """U-Net Convolutional Neural Network"""
 
-    def __init__(self, in_channels=1, out_channels=1):
+    """
+        U-Net reduces the size of spacial dimensioning while still extracting
+        high level features.
+    """
+
+    def __init__(self, in_channels=3, out_channels=1):
         super(UNet, self).__init__()
 
         # Encoder
@@ -68,8 +37,8 @@ class UNet(nn.Module):
         self.enc2 = self.conv_block(64, 128)
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
 
-        # Bottleneck
-        self.bottleneck = self.conv_block(128, 256)
+        # Convolution
+        self.conv_block = self.conv_block(128, 256)
 
         # Decoder
         self.upconv2 = nn.ConvTranspose2d(256, 128, kernel_size=2, stride=2)
@@ -79,7 +48,7 @@ class UNet(nn.Module):
 
         # Final Convolution
         self.final_conv = nn.Conv2d(64, out_channels, kernel_size=1)
-        self.activation = nn.Sigmoid()
+        self.activation = nn.Sigmoid()  # Sigmoid for pixel-wise probabilities
 
     def conv_block(self, in_channels, out_channels):
         return nn.Sequential(
@@ -94,11 +63,11 @@ class UNet(nn.Module):
         enc1 = self.enc1(x)
         enc2 = self.enc2(self.pool(enc1))
 
-        # Bottleneck
-        bottleneck = self.bottleneck(self.pool(enc2))
+        # Convolution
+        conv_block = self.conv_block(self.pool(enc2))
 
         # Decoder
-        dec2 = self.upconv2(bottleneck)
+        dec2 = self.upconv2(conv_block)
         dec2 = self.dec2(torch.cat([dec2, enc2], dim=1))
         dec1 = self.upconv1(dec2)
         dec1 = self.dec1(torch.cat([dec1, enc1], dim=1))
@@ -107,37 +76,44 @@ class UNet(nn.Module):
         return self.activation(self.final_conv(dec1))
 
 
-class SegmentDataset(Dataset):
+class SegmentationDataset(Dataset):
     """
     Prepare data for segmentation
     Dataset: (images/, masks/)
-    Return: image, mask
+    Return: image: tensor[], mask: tensor[]
     """
 
-    def __init__(self, img_dir, mask_dir, transform=None):
+    def __init__(self, img_dir, transform=None):
         self.img_dir = img_dir
-        self.mask_dir = mask_dir
         self.transform = transform
-        self.img_len = os.listdir(self.img_dir)
+        self.imgs = [f for f in os.listdir(self.img_dir) if f.endswith(".jpg")]
+        self.masks = [f for f in os.listdir(self.img_dir) if f.endswith(".json")]
 
     def __len__(self):
         return len(self.img_len)
 
     def __getitem__(self, idx) -> tuple[torch.Tensor, torch.Tensor]:
-        # Set paths to image data directories
-        img_path = os.path.join(self.img_dir, self.img_len[idx])
-        mask_path = os.path.join(self.mask_dir, self.img_len[idx])
+        img_name = self.imgs[idx]
+        img_path = os.path.join(self.img, img_name)
+        image = Image.open(img_path).convert("RGB")
 
-        # Resize image
-        image = resize(Image.open(img_path).convert("RGB"), (96, 156))
-        mask = resize(Image.open(mask_path).convert("L"), (96, 156))
-
-        # Save resized image (optional)
-        # image.save(img_path)
-        # mask.save(mask_path)
+        mask_name = self.masks[idx]
+        mask_path = os.path.join(self.img_dir, mask_name)
+        with open(mask_path, "r") as f:
+            mask_data = json.load(f)
+        mask = self._create_mask(mask_data, image.size)
 
         # Turn image into tensor data
-        image = torch.from_numpy(np.array(image)).permute(2, 0, 1).float() / 255.0
-        mask = torch.from_numpy(np.array(mask)).unsqueeze(0).float() / 255.0
-
         return image, mask
+
+    def _create_mask(self, data, size):
+        w, h = size
+        msk = np.zeros((w, h), dtype=np.uint8)
+
+        for label in data["annotation"]:
+            if "segmentation" in label:
+                segment = label
+                if isinstance(segment, list):
+                    for poly in segment:
+                        poly = np.array(poly).reshape(-1, 2)
+                        msk = cv2.fillPoly(msk, [poly.astype(np.int32)], 1)

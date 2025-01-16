@@ -23,6 +23,7 @@ This is a multi(3) model application.
 - Segmentation ([Convolutional Neural Network]('utils.py')):
 
   - A CNN is especially adapt at edge detection such as the edge of a dress of body part.
+
   - This project uses a model based on the pytorch tutorial model. This is a good starting
     point for a custom CNN build. This model is currently only taking one input and applying
     softmax with a dimension of one
@@ -37,8 +38,9 @@ This is a multi(3) model application.
 
 ## training data
 
-The training data will be the product images
-[Zander](https://www.maggiesottero.com/sottero-and-midgley/zander/11869)
+- [SA-1B](https://ai.meta.com/datasets/segment-anything-downloads/)
+
+  - A Meta AI dataset with 11M images and 1.1B mask annotations.
 
 ## Purpose
 

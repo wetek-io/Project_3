@@ -23,39 +23,37 @@ class CNN(nn.Module):
         Convolution Neural Network
         """
         super(CNN, self).__init__()
-        # 3 input channel, 32 conv_features, 1 kernel size 3
-        self.conv1 = nn.Conv2d(3, 32, 3, 1)
+        # 3 input channel, 32 conv_features, 3 kernel size 3
+        self.conv1 = nn.Conv2d(3, 32, 2, 3)
 
-        # 32 input layers, 64 conv_features, 1 kernel size 3
-        self.conv2 = nn.Conv2d(32, 64, 3, 1)
+        # 32 input layers, 64 conv_features, 3 kernel size 3
+        self.conv2 = nn.Conv2d(32, 64, 2, 3)
 
         # Ensure adjacent pixels are 0 or active
         self.dropout1 = nn.Dropout(0.25)
         self.dropout2 = nn.Dropout(0.5)
 
         # Full connect layer 1
-        self.fc1 = nn.Linear(9216, 128)
+        self.fc1 = nn.Linear(32, 64)
 
         # Full connect layer 2 with 10 output labels
-        self.fc2 = nn.Linear(128, 10)
+        self.fc2 = nn.Linear(32, 10)
 
     def forward(self, x):
-        # x: data
-        x = self.conv1(x)
+        # rectified-linear function activation and run x through first convolution layer
+        x = F.relu(self.conv1(x))
 
-        # rectified-linear function activation
-        x = F.relu(x)
-        x = self.conv2(x)  # 32 inputs, 64 features, 1x3 kernel
-        x = F.relu(x)
+        # rectified-linear function activation and run x through second convolution layer
+        x = F.relu(self.conv2(x))
 
         # Max pool over x set kernels
         x = F.max_pool2d(x, kernel_size=2)
         x = self.dropout1(x)
 
+        print(x.shape)
         # Flatten x to 1 dim
         x = torch.flatten(x, 1)
-        x = self.fc1(x)
-        x = F.relu(x)
+        x = F.relu(self.fc1(x))
 
         x = self.dropout2(x)
         x = self.fc2(x)

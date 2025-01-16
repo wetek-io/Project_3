@@ -12,14 +12,17 @@ has good contract, a large number of images, including different angles, as well
 gown on a maniquen, there is also a black and a white version of the dress which will help a great deal for
 maintain gown detail in the final generation.
 
+## Environment
+
+[Miniconda MacOSX arm64](https://pytorch.org/get-started/locally/#mac-anaconda)
+
 ## model selection
 
 This is a multi(3) model application.
 
-- Segmentation (U-Net):
+- Segmentation ([Convolutional Neural Network]('model.py')):
 
-  - identify which segments of the image are the model(human) and the gown it self
-  - U-net'a [architecture](https://arxiv.org/pdf/1505.04597v1) is based off the convolution neural network. Purposely design for segmenting biomedical images such as tumor detection
+  - A CNN is especially adapt at edge detection such as the edge of a dress of body part.
 
 - Pose Evaluation (OpenPose or MediaPipe Pose):
 

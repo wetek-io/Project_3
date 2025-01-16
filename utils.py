@@ -3,24 +3,73 @@ Utilities for VGTO (Virtual Gown Try-On)
 Refer to white paper for guidance.
 """
 
-import torch
-import torch.nn as nn
 from torch.utils.data import Dataset
+from torchvision import transforms
+import torch.nn.functional as F
+import torch.nn as nn
 from PIL import Image
 import numpy as np
+import torch
 import os
-from torchvision import transforms
 
 
 def resize(image: Image.Image, dimensions: tuple[int, int]) -> Image.Image:
     return image.resize(dimensions)
 
 
+class CNN(nn.Module):
+    def __init__(self):
+        """
+        Convolution Neural Network
+        """
+        super(CNN, self).__init__()
+        self.conv1 = nn.Conv2d(
+            1, 32, 3, 1
+        )  # 1 input channel, 32 conv_features, 1 kernel size 3
+        self.conv2 = nn.Conv2d(
+            32, 64, 3, 1
+        )  # 32 input layers, 64 conv_features, 1 kernel size 3
+
+        # Ensure adjacent pixels are 0 or active
+        self.dropout1 = nn.Dropout(0.25)
+        self.dropout2 = nn.Dropout(0.5)
+
+        # Full connect layer 1
+        self.fc1 = nn.Linear(9216, 128)
+
+        # Full connect layer 2 with 10 output labels
+        self.fc2 = nn.Linear(128, 10)
+
+    def forward(self, x):
+        # x: data
+        x = self.conv1(x)
+
+        # rectified-linear function activation
+        x = F.relu(x)
+        x = self.conv2(x)
+        x = F.relu(x)
+
+        # Max pool over x
+        x = F.max_pool2d(x, 2)
+        x = self.dropout1(x)
+
+        # Flatten x to 1 dim
+        x = torch.flatten(x, 1)
+        x = self.fc1(x)
+        x = F.relu(x)
+        x = self.dropout2(x)
+        x = self.fc2(x)
+
+        output = F.log_softmax(x, dim=1)
+        return output
+
+
 class UNet(nn.Module):
     """U-Net Convolutional Neural Network"""
 
-    def __init__(self, in_channels=3, out_channels=1):
+    def __init__(self, in_channels=1, out_channels=1):
         super(UNet, self).__init__()
+
         # Encoder
         self.enc1 = self.conv_block(in_channels, 64)
         self.enc2 = self.conv_block(64, 128)
@@ -66,6 +115,7 @@ class UNet(nn.Module):
 
 
 class SegmentationDataset(Dataset):
+
     def __init__(self, img_dir, mask_dir, transform=None):
         self.img_dir = img_dir
         self.mask_dir = mask_dir
@@ -79,16 +129,11 @@ class SegmentationDataset(Dataset):
         img_path = os.path.join(self.img_dir, self.img_len[idx])
         mask_path = os.path.join(self.mask_dir, self.img_len[idx])
 
-        image = Image.open(img_path).convert("RGB")
-        mask = Image.open(mask_path).convert("L")
-
-        if self.transform:
-            image = self.transform(image)
-            mask = self.transform(mask)
-        else:
-            image = resize(image, (256, 256))
-            mask = resize(mask, (256, 256))
-            image = torch.from_numpy(np.array(image)).permute(2, 0, 1).float() / 255.0
-            mask = torch.from_numpy(np.array(mask)).unsqueeze(0).float() / 255.0
+        image = resize(Image.open(img_path).convert("RGB"), (156, 56))
+        mask = resize(Image.open(mask_path).convert("L"), (156, 56))
+        image.save(img_path)
+        mask.save(mask_path)
+        image = torch.from_numpy(np.array(image)).permute(2, 0, 1).float() / 255.0
+        mask = torch.from_numpy(np.array(mask)).unsqueeze(0).float() / 255.0
 
         return image, mask

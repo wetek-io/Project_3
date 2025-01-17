@@ -17,16 +17,15 @@ import os
 TRANSFORM = transforms.Compose([transforms.Resize((128, 128)), transforms.ToTensor()])
 
 
-def resize(image: Image.Image, dimensions: tuple[int, int]) -> Image.Image:
-    return image.resize(dimensions)
-
-
 class UNet(nn.Module):
     """U-Net Convolutional Neural Network"""
 
     """
-        U-Net reduces the size of spacial dimensioning while still extracting
-        high level features.
+        While encoding U-Net reduces the size of spacial dimensioning while still extracting
+        high level features. Then runs a convolution over those features before decoding them.
+        This model implements 'skip-connection' this allows the model to match the spacial data
+        with the high level features from the decoder. This implementation is what makes this a
+        true U-Net model.
     """
 
     def __init__(self, in_channels=3, out_channels=1):
@@ -38,7 +37,7 @@ class UNet(nn.Module):
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
 
         # Convolution
-        self.conv_block = self.conv_block(128, 256)
+        self.bottleneck = self.conv_block(128, 256)
 
         # Decoder
         self.upconv2 = nn.ConvTranspose2d(256, 128, kernel_size=2, stride=2)
@@ -83,18 +82,18 @@ class SegmentationDataset(Dataset):
     Return: image: tensor[], mask: tensor[]
     """
 
-    def __init__(self, img_dir, transform=None):
+    def __init__(self, img_dir, transform=TRANSFORM):
         self.img_dir = img_dir
         self.transform = transform
         self.imgs = [f for f in os.listdir(self.img_dir) if f.endswith(".jpg")]
         self.masks = [f for f in os.listdir(self.img_dir) if f.endswith(".json")]
 
     def __len__(self):
-        return len(self.img_len)
+        return len(self.imgs)
 
     def __getitem__(self, idx) -> tuple[torch.Tensor, torch.Tensor]:
         img_name = self.imgs[idx]
-        img_path = os.path.join(self.img, img_name)
+        img_path = os.path.join(self.img_dir, img_name)
         image = Image.open(img_path).convert("RGB")
 
         mask_name = self.masks[idx]

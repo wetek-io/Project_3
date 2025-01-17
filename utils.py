@@ -15,14 +15,6 @@ import json
 import cv2
 import os
 
-TRANSFORM = transforms.Compose(
-    [
-        transforms.Resize((128, 128)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ]
-)
-
 
 class UNet(nn.Module):
     """U-Net Convolutional Neural Network"""
@@ -102,11 +94,19 @@ class SegmentationDataset(Dataset):
     Return: image: tensor[], mask: tensor[]
     """
 
-    def __init__(self, img_dir, transform=TRANSFORM, debug=False):
+    def __init__(self, img_dir):
         self.img_dir = img_dir
-        self.transform = transform
         self.imgs = [f for f in os.listdir(self.img_dir) if f.endswith(".jpg")]
         self.masks = [f for f in os.listdir(self.img_dir) if f.endswith(".json")]
+        self.transform = transforms.Compose(
+            [
+                transforms.Resize((128, 128)),
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                ),
+            ]
+        )
 
     def __len__(self):
         return len(self.imgs)
@@ -119,35 +119,32 @@ class SegmentationDataset(Dataset):
         mask_name = self.masks[idx]
         mask_path = os.path.join(self.img_dir, mask_name)
         with open(mask_path, "r") as f:
-            mask_data = json.load(f)
-        mask = self._create_mask(mask_data, image.size)
+            mask = self._create_mask(json.load(f), image.size)
 
-        if self.transform:
-            image = self.transform(image)
-            mask = TF.resize(Image.fromarray(mask), image.size)
-            mask = torch.from_numpy(mask).float()
-
-        # Debugging checks
-        if self.debug:
-            print(f"Image and mask sizes do not match: {image.shape} vs {mask.shape}")
-            print(f"Expected image dtype torch.float32 but got {image.dtype}")
-            print(f"Expected mask dtype torch.float32 but got {mask.dtype}")
+        image = self.transform(image)
+        mask = TF.resize(Image.fromarray(mask), image.size)
+        mask = torch.from_numpy(mask).long()
 
         # Turn image into tensor data
         return image, mask
 
     def _create_mask(self, data, size):
-        w, h = size
-        mask = np.zeros((w, h), dtype=np.uint8)
+        h, w = size  # Correct the shape order
+        mask = np.zeros((h, w), dtype=np.uint8)
 
-        if "annotations" not in data or not data["annotations"]:
-            print(f"Warning: No annotations found in data: {data}")
+        if not data.get("annotations"):
+            print(f"Warning: No annotations found in the JSON file.")
             return mask
 
         for annotation in data["annotations"]:
             if "segmentation" in annotation:
-                segmentation = annotation
-                if isinstance(segmentation, list):
+                segmentation = annotation["segmentation"]
+                if isinstance(segmentation, list):  # Handle polygon format
                     for poly in segmentation:
                         poly = np.array(poly).reshape(-1, 2)
                         mask = cv2.fillPoly(mask, [poly.astype(np.int32)], 1)
+                elif isinstance(segmentation, dict) and "counts" in segmentation:
+                    decoded_mask = .decode(segmentation)
+                    mask = np.logical_or(mask, decoded_mask).astype(np.uint8)
+
+        return mask

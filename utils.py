@@ -5,6 +5,7 @@ Refer to white paper for guidance.
 
 from torch.utils.data import Dataset
 from torchvision import transforms
+from torchvision.transforms import functional as F
 import torch.nn.functional as F
 import torch.nn as nn
 from PIL import Image
@@ -14,7 +15,13 @@ import json
 import cv2
 import os
 
-TRANSFORM = transforms.Compose([transforms.Resize((128, 128)), transforms.ToTensor()])
+TRANSFORM = transforms.Compose(
+    [
+        transforms.Resize((128, 128)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ]
+)
 
 
 class UNet(nn.Module):
@@ -28,7 +35,7 @@ class UNet(nn.Module):
         true U-Net model.
     """
 
-    def __init__(self, in_channels=3, out_channels=1):
+    def __init__(self, in_channels=3, out_channels=1, debug=False):
         super(UNet, self).__init__()
 
         # Encoder
@@ -58,6 +65,15 @@ class UNet(nn.Module):
         )
 
     def forward(self, x):
+        # Input validation
+        if self.debug:
+            assert (
+                len(x.shape) == 4
+            ), f"Expected 4D input (batch, channels, height, width) but got {x.shape}"
+            assert (
+                x.size(1) == 3
+            ), f"Expected 3 channels for input images but got {x.size(1)}"
+
         # Encoder
         enc1 = self.enc1(x)
         enc2 = self.enc2(self.pool(enc1))
@@ -72,7 +88,15 @@ class UNet(nn.Module):
         dec1 = self.dec1(torch.cat([dec1, enc1], dim=1))
 
         # Output
-        return self.activation(self.final_conv(dec1))
+        output = self.activation(self.final_conv(dec1))
+
+        # Output validation
+        if self.debug:
+            assert (
+                output.shape == x.shape
+            ), f"Expected output shape {x.shape} but got {output.shape}"
+
+        return output
 
 
 class SegmentationDataset(Dataset):
@@ -82,7 +106,7 @@ class SegmentationDataset(Dataset):
     Return: image: tensor[], mask: tensor[]
     """
 
-    def __init__(self, img_dir, transform=TRANSFORM):
+    def __init__(self, img_dir, transform=TRANSFORM, debug=False):
         self.img_dir = img_dir
         self.transform = transform
         self.imgs = [f for f in os.listdir(self.img_dir) if f.endswith(".jpg")]
@@ -101,6 +125,23 @@ class SegmentationDataset(Dataset):
         with open(mask_path, "r") as f:
             mask_data = json.load(f)
         mask = self._create_mask(mask_data, image.size)
+
+        if self.transform:
+            image = self.transform(image)
+            mask = F.resize(Image.fromarray(mask), image.size)
+            mask = torch.from_numpy(mask).float()
+
+        # Debugging checks
+        if self.debug:
+            assert (
+                image.shape[1:] == mask.shape
+            ), f"Image and mask sizes do not match: {image.shape[1:]} vs {mask.shape}"
+            assert (
+                image.dtype == torch.float32
+            ), f"Expected image dtype torch.float32 but got {image.dtype}"
+            assert (
+                mask.dtype == torch.float32
+            ), f"Expected mask dtype torch.float32 but got {mask.dtype}"
 
         # Turn image into tensor data
         return image, mask

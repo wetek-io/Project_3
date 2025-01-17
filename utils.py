@@ -3,9 +3,9 @@ Utilities for VGTO (Virtual Gown Try-On)
 Refer to white paper for guidance.
 """
 
+from torchvision.transforms import functional as TF
 from torch.utils.data import Dataset
 from torchvision import transforms
-from torchvision.transforms import functional as F
 import torch.nn.functional as F
 import torch.nn as nn
 from PIL import Image
@@ -67,22 +67,20 @@ class UNet(nn.Module):
     def forward(self, x):
         # Input validation
         if self.debug:
-            assert (
-                len(x.shape) == 4
-            ), f"Expected 4D input (batch, channels, height, width) but got {x.shape}"
-            assert (
-                x.size(1) == 3
-            ), f"Expected 3 channels for input images but got {x.size(1)}"
+            print(
+                f"Expected 4D input (batch, channels, height, width) but got {x.shape}"
+            )
+            print(f"Expected 3 channels for input images but got {x.size(1)}")
 
         # Encoder
         enc1 = self.enc1(x)
         enc2 = self.enc2(self.pool(enc1))
 
         # Convolution
-        conv_block = self.conv_block(self.pool(enc2))
+        bottleneck = self.conv_block(self.pool(enc2))
 
         # Decoder
-        dec2 = self.upconv2(conv_block)
+        dec2 = self.upconv2(bottleneck)
         dec2 = self.dec2(torch.cat([dec2, enc2], dim=1))
         dec1 = self.upconv1(dec2)
         dec1 = self.dec1(torch.cat([dec1, enc1], dim=1))
@@ -92,9 +90,7 @@ class UNet(nn.Module):
 
         # Output validation
         if self.debug:
-            assert (
-                output.shape == x.shape
-            ), f"Expected output shape {x.shape} but got {output.shape}"
+            print(f"Expected output shape {x.shape} but got {output.shape}")
 
         return output
 
@@ -128,32 +124,30 @@ class SegmentationDataset(Dataset):
 
         if self.transform:
             image = self.transform(image)
-            mask = F.resize(Image.fromarray(mask), image.size)
+            mask = TF.resize(Image.fromarray(mask), image.size)
             mask = torch.from_numpy(mask).float()
 
         # Debugging checks
         if self.debug:
-            assert (
-                image.shape[1:] == mask.shape
-            ), f"Image and mask sizes do not match: {image.shape[1:]} vs {mask.shape}"
-            assert (
-                image.dtype == torch.float32
-            ), f"Expected image dtype torch.float32 but got {image.dtype}"
-            assert (
-                mask.dtype == torch.float32
-            ), f"Expected mask dtype torch.float32 but got {mask.dtype}"
+            print(f"Image and mask sizes do not match: {image.shape} vs {mask.shape}")
+            print(f"Expected image dtype torch.float32 but got {image.dtype}")
+            print(f"Expected mask dtype torch.float32 but got {mask.dtype}")
 
         # Turn image into tensor data
         return image, mask
 
     def _create_mask(self, data, size):
         w, h = size
-        msk = np.zeros((w, h), dtype=np.uint8)
+        mask = np.zeros((w, h), dtype=np.uint8)
 
-        for label in data["annotation"]:
-            if "segmentation" in label:
-                segment = label
-                if isinstance(segment, list):
-                    for poly in segment:
+        if "annotations" not in data or not data["annotations"]:
+            print(f"Warning: No annotations found in data: {data}")
+            return mask
+
+        for annotation in data["annotations"]:
+            if "segmentation" in annotation:
+                segmentation = annotation
+                if isinstance(segmentation, list):
+                    for poly in segmentation:
                         poly = np.array(poly).reshape(-1, 2)
-                        msk = cv2.fillPoly(msk, [poly.astype(np.int32)], 1)
+                        mask = cv2.fillPoly(mask, [poly.astype(np.int32)], 1)

@@ -100,9 +100,10 @@ Example Flow Visualization 1.
 ```bash
 conda deactivate
 conda deactivate
-conda env remove --name=project_3 -y
+conda env remove -n project_3 -y
 conda env create -f env.yml -y
 conda activate project_3
+conda clean --all --yes
 ```
 
 ### Developer Notes:

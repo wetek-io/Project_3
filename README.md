@@ -3,14 +3,12 @@
 Image ML for virtual Gown try on.
 
 **From A High Level**
-This app is ment to allow brides to try on gown virtually while visiting our website. The model training data
-will be the publicly available product images from https://www.maggiesottero.com. These images are of the
-model(human) and the and the gown. The challenge with this is nuanced wedding gowns are highly detailed
-so the images must be as high quality as achievable. Luckily each product only has reality few images typically 10-20. For this project I plan on selecting just a single gown. I chose this one because it
-presents the fewest issues. The [Zander](https://www.maggiesottero.com/sottero-and-midgley/zander/11869) gown
-has good contract, a large number of images, including different angles, as well as close up images of the
-gown on a maniquen, there is also a black and a white version of the dress which will help a great deal for
-maintain gown detail in the final generation.
+This app is ment to allow brides to try on gown virtually while visiting our website. This project
+uses a custom UNet model which will be trained on the Meta AI segmentation dataset SA-1B.
+
+The model needs to be pre-trained for the app.
+
+When a user uploads an image it will will be segmented by the model in parallel with OpenPose.
 
 ## Environment
 
@@ -22,19 +20,27 @@ This is a multi(3) model application.
 
 - Segmentation ([Convolutional Neural Network]('utils.py')):
 
+  - [Image-to-Image G]
   - A CNN is especially adapt at edge detection such as the edge of a dress of body part.
-
   - This project uses a model based on the pytorch tutorial model. This is a good starting
     point for a custom CNN build. This model is currently only taking one input and applying
     softmax with a dimension of one
 
-- Pose Evaluation (OpenPose or MediaPipe Pose):
+- Pose Evaluation (OpenPose):
 
+  - [OpenPoses (A collection of poses for OpenPose)](https://openposes.com/)
   - For detecting the shoulders, hips, and bust anchor points
 
-- Image Generation (Pix2Pix, CycleGAN or VITON/CP-VTON):
+- Image Generation (CycleGAN):
 
   - Generate image of bride wearing gown
+
+- **!!Important!! Further reading**
+
+  - [CycleGAN (Medium)](https://medium.com/@chilldenaya/cyclegan-introduction-pytorch-implementation-5b53913741ca)
+
+  - [Convolutional Pose Machines (PDF)](https://arxiv.org/pdf/1602.00134)
+  - [CycleGAN.ipynb (Google colab)](https://colab.research.google.com/drive/1BuI-9P1-ku00Nc1tPbBhoeL006-3tNUS?usp=sharing)
 
 ## training data
 

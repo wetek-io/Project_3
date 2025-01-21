@@ -27,7 +27,7 @@ class UNet(nn.Module):
         true U-Net model.
     """
 
-    def __init__(self, in_channels=3, out_channels=1, debug=False):
+    def __init__(self, in_channels=3, out_channels=1):
         super(UNet, self).__init__()
 
         # Encoder

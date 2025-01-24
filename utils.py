@@ -57,13 +57,6 @@ class UNet(nn.Module):
         )
 
     def forward(self, x):
-        # Input validation
-        if self.debug:
-            print(
-                f"Expected 4D input (batch, channels, height, width) but got {x.shape}"
-            )
-            print(f"Expected 3 channels for input images but got {x.size(1)}")
-
         # Encoder
         enc1 = self.enc1(x)
         enc2 = self.enc2(self.pool(enc1))
@@ -79,10 +72,6 @@ class UNet(nn.Module):
 
         # Output
         output = self.activation(self.final_conv(dec1))
-
-        # Output validation
-        if self.debug:
-            print(f"Expected output shape {x.shape} but got {output.shape}")
 
         return output
 
@@ -137,14 +126,11 @@ class SegmentationDataset(Dataset):
             return mask
 
         for annotation in data["annotations"]:
-            if "segmentation" in annotation:
-                segmentation = annotation["segmentation"]
-                if isinstance(segmentation, list):  # Handle polygon format
-                    for poly in segmentation:
-                        poly = np.array(poly).reshape(-1, 2)
-                        mask = cv2.fillPoly(mask, [poly.astype(np.int32)], 1)
-                elif isinstance(segmentation, dict) and "counts" in segmentation:
-                    decoded_mask = .decode(segmentation)
-                    mask = np.logical_or(mask, decoded_mask).astype(np.uint8)
+            bbox = annotation["bbox"]
+            segmentation = annotation["segmentation"]
+            predicted_iou = annotation["predicted_iou"]
+            print(f"Bounding Box: {bbox}")
+            print(f"Segmentation RLE: {segmentation['counts'][:50]}...")  # Partial view
+            print(f"Predicted IoU: {predicted_iou}")
 
         return mask

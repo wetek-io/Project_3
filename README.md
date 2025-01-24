@@ -145,7 +145,7 @@ Project development data: [Zander](https://www.maggiesottero.com/sottero-and-mid
 
 ## Team Breakdown and Task Assignments
 
-## Pose Detection & Keypoints Extraction (JD, Roger)
+## Pose Detection & Keypoints Extraction (JD, Roger):
 
 Goal: Quickly implement pose estimation to detect the user’s posture.
 Tools: Use a pre-trained model like TensorFlow MoveNet or PoseNet.
@@ -169,7 +169,7 @@ Tasks:
 - Deliverable: API/module to return body masks from uploaded images.
 - Time Allocation: 4 days.
 
-## Gown Overlay and Warping (Keri, Dane)
+## Gown Overlay and Warping (Keri, Dane):
 
 Goal: Develop a module to overlay and align the gown with the detected pose.
 Tools: Use simple transformations (e.g., Thin Plate Splines or Affine Transformations).
@@ -181,7 +181,7 @@ Tasks:
 - Deliverable: A functional overlay module for at least 2–3 sample gowns.
 - Time Allocation: 6 days.
 
-## Frontend Developer (Steven)
+## Frontend Developer (Steven):
 
 Goal: Build a simple, user-friendly interface for the try-on experience.
 Tools: React Native or Flutter.
@@ -193,7 +193,7 @@ Tasks:
 - Deliverable: A working UI that integrates with the backend.
 - Time Allocation: 7 days.
 
-## Backend Developer (Reis, Ian)
+## Backend Developer (Reis, Ian):
 
 Goal: Set up the server for processing pose detection, segmentation, and gown fitting.
 Tools: Use FastAPI or Flask.
@@ -205,7 +205,7 @@ Tasks:
 - Deliverable: A functional backend with API endpoints for the frontend.
 - Time Allocation: 7 days.
 
-## Project Manager & QA Specialist (Ian, Keri)
+## Project Manager & QA Specialist (Ian, Keri):
 
 Goal: Ensure coordination, testing, and iterative improvements.
 

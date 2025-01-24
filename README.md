@@ -130,3 +130,54 @@ Project development data: [Zander](https://www.maggiesottero.com/sottero-and-mid
   - [The U-Net: A complete guide (Medium)]: (https://medium.com/@alejandro.itoaramendia/decoding-the-u-net-a-complete-guide-810b1c6d56d8#https://medium.com/@alejandro.itoaramendia/convolutional-neural-networks-cnns-a-complete-guide-a803534a1930)
 
 - [Convolutional Image Segmentation](https://arxiv.org/pdf/1706.05587v3)
+
+Focus Areas for the 2.5-Week Timeline 1. Pose Detection & Body Segmentation: Use pre-trained models to save time. 2. Gown Overlay & Warping: Focus on 2D overlays with minimal physics for now. 3. Frontend & Backend Integration: Ensure seamless communication between user inputs and the models. 4. Testing & Iteration: Prioritize basic functionality over perfection.
+Team Breakdown and Task Assignments
+Pose Detection & Keypoint Extraction (JD, Roger)
+• Goal: Quickly implement pose estimation to detect the user’s posture.
+• Tools: Use a pre-trained model like TensorFlow MoveNet or PoseNet.
+• Tasks:
+• Integrate the pose detection model for single images.
+• Output keypoints (e.g., shoulders, hips) for gown alignment.
+• Deliverable: API/module that takes an image and returns pose keypoints.
+• Time Allocation: 4 days
+Body Segmentation Specialist (Carson, Steven)
+• Goal: Identify and segment the user’s body from the background.
+• Tools: Use a pre-trained segmentation model like MediaPipe Selfie Segmentation or DeepLabV3+.
+• Tasks:
+• Segment the body to create a mask for overlaying the gown.
+• Handle simple backgrounds for faster processing.
+• Deliverable: API/module to return body masks from uploaded images.
+• Time Allocation: 4 days.
+Gown Overlay and Warping (Keri, Dane)
+• Goal: Develop a module to overlay and align the gown with the detected pose.
+• Tools: Use simple transformations (e.g., Thin Plate Splines or Affine Transformations).
+• Tasks:
+• Align gowns to shoulders, hips, and legs based on pose keypoints.
+• Add minimal scaling to adjust for body size variations.
+• Deliverable: A functional overlay module for at least 2–3 sample gowns.
+• Time Allocation: 6 days.
+Frontend Developer (Steven)
+• Goal: Build a simple, user-friendly interface for the try-on experience.
+• Tools: React Native or Flutter.
+• Tasks:
+• Allow users to upload photos and select gowns.
+• Display results from the backend (pose, segmentation, and gown overlay).
+• Deliverable: A working UI that integrates with the backend.
+• Time Allocation: 7 days.
+Backend Developer (Reis, Ian)
+• Goal: Set up the server for processing pose detection, segmentation, and gown fitting.
+• Tools: Use FastAPI or Flask.
+• Tasks:
+• Host models and manage API calls from the frontend.
+• Handle image uploads and return processed results.
+• Deliverable: A functional backend with API endpoints for the frontend.
+• Time Allocation: 7 days.
+Project Manager & QA Specialist (Ian, Keri)
+• Goal: Ensure coordination, testing, and iterative improvements.
+• Tasks:
+• Manage timelines and ensure deliverables align with milestones.
+• Test each module for performance and accuracy.
+• Provide feedback for quick fixes and optimizations.
+• Deliverable: A project roadmap, test cases, and a consolidated MVP demo.
+• Time Allocation: Continuous, with focused testing in the last 4 days.

@@ -149,6 +149,7 @@ Project development data: [Zander](https://www.maggiesottero.com/sottero-and-mid
 
 Goal: Quickly implement pose estimation to detect the user’s posture.
 Tools: Use a pre-trained model like TensorFlow MoveNet or PoseNet.
+
 Tasks:
 
 - Integrate the pose detection model for single images.
@@ -172,6 +173,7 @@ Tasks:
 
 Goal: Develop a module to overlay and align the gown with the detected pose.
 Tools: Use simple transformations (e.g., Thin Plate Splines or Affine Transformations).
+
 Tasks:
 
 - Align gowns to shoulders, hips, and legs based on pose keypoints.
@@ -183,6 +185,7 @@ Tasks:
 
 Goal: Build a simple, user-friendly interface for the try-on experience.
 Tools: React Native or Flutter.
+
 Tasks:
 
 - Allow users to upload photos and select gowns.
@@ -194,6 +197,7 @@ Tasks:
 
 Goal: Set up the server for processing pose detection, segmentation, and gown fitting.
 Tools: Use FastAPI or Flask.
+
 Tasks:
 
 - Host models and manage API calls from the frontend.

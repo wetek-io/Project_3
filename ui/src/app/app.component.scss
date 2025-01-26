@@ -1,0 +1,20 @@
+.ui-container {
+	
+	.image-container {
+		
+		.reference-images{			
+			width: fit-content;
+			margin: auto;
+			overflow-y: hidden;
+			overflow-x: auto;
+			position: relative;
+			
+			.image {
+				width: 66%;
+				height: auto;
+				margin: auto;
+				float: 1;
+			}
+		}
+	}
+}

@@ -1,0 +1,15 @@
+<div class="archon-container">
+  <h1>Go ahead. Try it on.</h1>
+  <div class="image-container">
+  <div class="reference-images" *ngFor="let image of reference_images">
+    <div class="previous">
+      <span class="prv arrow"></span>
+    </div>
+      <img [src]="image">
+      <!-- use a slider to pick a reference image -->
+    </div>
+    <div class="next">
+      <span class="nxt arrow"></span>
+    </div>
+  </div>
+</div>

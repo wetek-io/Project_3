@@ -1,0 +1,16 @@
+/*
+This is to reset everything to max window size.
+This is the first step for dynamic UIs.
+It allows for mobile first design more organically by
+setting standard from which all subsequent styling will
+be based on. 
+*/
+:root, body, html, app-root {
+	display: block;
+	max-width: 100vw;
+	max-height: 100vh;
+	padding: 0;
+	margin: 0;
+	background: none;
+	color: unset;
+}

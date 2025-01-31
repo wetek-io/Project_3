@@ -3,94 +3,29 @@ Utilities for VGTO (Virtual Gown Try-On)
 Refer to white paper for guidance.
 """
 
-from typing import Sequence
 from torchvision.transforms import functional as TF
 from torch.utils.data import Dataset
 from torchvision import transforms
-import matplotlib.pyplot as plt
 import torch.nn.functional as F
-import tensorflow_datasets as tfds
 import torch.nn as nn
 from PIL import Image
 import numpy as np
 import torch
 import json
+import cv2
 import os
-
-FeaturesDict = tfds.features.FeaturesDict
-Scalar = tfds.features.Scalar
-BBoxFeature = tfds.features.BBoxFeature
-Tensor = tfds.features.Tensor
-Image = tfds.features.Image
-
-import tensorflow_datasets as tfds
-import numpy as np
-
-FeaturesDict = tfds.features.FeaturesDict(
-    {
-        "annotations": tfds.features.Sequence(
-            {
-                "area": tfds.features.Scalar(
-                    dtype=np.uint64, description="The area in pixels of the mask."
-                ),
-                "bbox": tfds.features.BBoxFeature(
-                    shape=(4,),
-                    dtype=np.float32,
-                    description="The box around the mask, in TFDS format.",
-                ),
-                "crop_box": tfds.features.BBoxFeature(
-                    shape=(4,),
-                    dtype=np.float32,
-                    description="The crop of the image used to generate the mask, in TFDS format.",
-                ),
-                "id": tfds.features.Scalar(
-                    dtype=np.uint64, description="Identifier for the annotation."
-                ),
-                "point_coords": tfds.features.Tensor(
-                    shape=(1, 2),
-                    dtype=np.float64,
-                    description="The point coordinates input to the model to generate the mask.",
-                ),
-                "predicted_iou": tfds.features.Scalar(
-                    dtype=np.float64,
-                    description="The model's own prediction of the mask's quality.",
-                ),
-                "segmentation": tfds.features.FeaturesDict(
-                    {
-                        "counts": tfds.features.Text(),  # Corrected as a string field
-                        "size": tfds.features.Tensor(shape=(2,), dtype=np.uint64),
-                    }
-                ),
-                "stability_score": tfds.features.Scalar(
-                    dtype=np.float64, description="A measure of the mask's quality."
-                ),
-            }
-        ),
-        "image": tfds.features.FeaturesDict(
-            {
-                "content": tfds.features.Image(
-                    shape=(None, None, 3),
-                    dtype=np.uint8,
-                    description="Content of the image.",
-                ),
-                "file_name": tfds.features.Text(),  # Corrected as a string field
-                "height": tfds.features.Scalar(
-                    dtype=np.uint64, description="Height of the image."
-                ),
-                "image_id": tfds.features.Scalar(
-                    dtype=np.uint64, description="Unique identifier for the image."
-                ),
-                "width": tfds.features.Scalar(
-                    dtype=np.uint64, description="Width of the image."
-                ),
-            }
-        ),
-    }
-)
 
 
 class UNet(nn.Module):
     """U-Net Convolutional Neural Network"""
+
+    """
+        While encoding U-Net reduces the size of spacial dimensioning while still extracting
+        high level features. Then runs a convolution over those features before decoding them.
+        This model implements 'skip-connection' this allows the model to match the spacial data
+        with the high level features from the decoder. This implementation is what makes this a
+        true U-Net model.
+    """
 
     def __init__(self, in_channels=3, out_channels=1):
         super(UNet, self).__init__()
@@ -111,7 +46,7 @@ class UNet(nn.Module):
 
         # Final Convolution
         self.final_conv = nn.Conv2d(64, out_channels, kernel_size=1)
-        self.activation = nn.Sigmoid()
+        self.activation = nn.Sigmoid()  # Sigmoid for pixel-wise probabilities
 
     def conv_block(self, in_channels, out_channels):
         return nn.Sequential(
@@ -127,7 +62,7 @@ class UNet(nn.Module):
         enc2 = self.enc2(self.pool(enc1))
 
         # Convolution
-        bottleneck = self.bottleneck(self.pool(enc2))
+        bottleneck = self.conv_block(self.pool(enc2))
 
         # Decoder
         dec2 = self.upconv2(bottleneck)
@@ -175,9 +110,27 @@ class SegmentationDataset(Dataset):
         with open(mask_path, "r") as f:
             mask = self._create_mask(json.load(f), image.size)
 
-        original_size = image.size  # (width, height)
         image = self.transform(image)
-        mask = TF.resize(Image.fromarray(mask), (original_size[1], original_size[0]))
-        mask = torch.from_numpy(np.array(mask)).long()
+        mask = TF.resize(Image.fromarray(mask), image.size)
+        mask = torch.from_numpy(mask).long()
 
+        # Turn image into tensor data
         return image, mask
+
+    def _create_mask(self, data, size):
+        h, w = size  # Correct the shape order
+        mask = np.zeros((h, w), dtype=np.uint8)
+
+        if not data.get("annotations"):
+            print(f"Warning: No annotations found in the JSON file.")
+            return mask
+
+        for annotation in data["annotations"]:
+            bbox = annotation["bbox"]
+            segmentation = annotation["segmentation"]
+            predicted_iou = annotation["predicted_iou"]
+            print(f"Bounding Box: {bbox}")
+            print(f"Segmentation RLE: {segmentation['counts'][:50]}...")  # Partial view
+            print(f"Predicted IoU: {predicted_iou}")
+
+        return mask

@@ -78,15 +78,24 @@ class UNet(nn.Module):
 
 class SegmentationDataset(Dataset):
     """
-    Prepare data for segmentation
-    Dataset: (images/, masks/)
-    Return: image: tensor[], mask: tensor[]
+    Prepare data for segmentation.
+    Dataset contains:
+    - images/ (JPG files)
+    - masks/ (JSON annotations)
+    Returns:
+    - image: torch.Tensor
+    - mask: torch.Tensor
     """
 
     def __init__(self, img_dir):
         self.img_dir = img_dir
-        self.imgs = [f for f in os.listdir(self.img_dir) if f.endswith(".jpg")]
-        self.masks = [f for f in os.listdir(self.img_dir) if f.endswith(".json")]
+        self.imgs = sorted([f for f in os.listdir(self.img_dir) if f.endswith(".jpg")])
+        self.masks = sorted(
+            [f for f in os.listdir(self.img_dir) if f.endswith(".json")]
+        )
+        # Ensure matching images and masks
+        if len(self.imgs) != len(self.masks):
+            raise ValueError("Mismatch between images and masks in dataset!")
         self.transform = transforms.Compose(
             [
                 transforms.Resize((128, 128)),
@@ -104,33 +113,37 @@ class SegmentationDataset(Dataset):
         img_name = self.imgs[idx]
         img_path = os.path.join(self.img_dir, img_name)
         image = Image.open(img_path).convert("RGB")
-
         mask_name = self.masks[idx]
         mask_path = os.path.join(self.img_dir, mask_name)
         with open(mask_path, "r") as f:
             mask = self._create_mask(json.load(f), image.size)
-
+        # Apply image transformations
         image = self.transform(image)
-        mask = TF.resize(Image.fromarray(mask), image.size)
-        mask = torch.from_numpy(mask).long()
-
-        # Turn image into tensor data
+        # Ensure mask is a NumPy array with correct dtype
+        mask = np.array(mask, dtype=np.uint8)
+        # Resize the mask correctly
+        w, h = image.shape[1], image.shape[2]  # Image tensor is (C, H, W)
+        mask = TF.resize(Image.fromarray(mask), (h, w))  # Resize with (H, W)
+        mask = torch.from_numpy(np.array(mask)).long()
         return image, mask
 
     def _create_mask(self, data, size):
-        h, w = size  # Correct the shape order
+        """Creates a binary mask from JSON annotations."""
+        w, h = size  # Correct the shape order
         mask = np.zeros((h, w), dtype=np.uint8)
-
         if not data.get("annotations"):
             print(f"Warning: No annotations found in the JSON file.")
             return mask
-
         for annotation in data["annotations"]:
-            bbox = annotation["bbox"]
-            segmentation = annotation["segmentation"]
-            predicted_iou = annotation["predicted_iou"]
-            print(f"Bounding Box: {bbox}")
-            print(f"Segmentation RLE: {segmentation['counts'][:50]}...")  # Partial view
-            print(f"Predicted IoU: {predicted_iou}")
-
+            bbox = annotation.get("bbox", None)
+            segmentation = annotation.get("segmentation", None)
+            predicted_iou = annotation.get("predicted_iou", None)
+            if bbox:
+                print(f"Bounding Box: {bbox}")
+            if segmentation:
+                print(
+                    f"Segmentation RLE: {segmentation['counts'][:50]}..."
+                )  # Partial view
+            if predicted_iou:
+                print(f"Predicted IoU: {predicted_iou}")
         return mask

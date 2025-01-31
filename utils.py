@@ -31,24 +31,24 @@ class UNet(nn.Module):
         super(UNet, self).__init__()
 
         # Encoder
-        self.enc1 = self.conv_block(in_channels, 64)
-        self.enc2 = self.conv_block(64, 128)
+        self.enc1 = self.bottleneck(in_channels, 64)
+        self.enc2 = self.bottleneck(64, 128)
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
 
         # Convolution
-        self.bottleneck = self.conv_block(128, 256)
+        self.bottleneck = self.bottleneck(128, 256)
 
         # Decoder
         self.upconv2 = nn.ConvTranspose2d(256, 128, kernel_size=2, stride=2)
-        self.dec2 = self.conv_block(256, 128)
+        self.dec2 = self.bottleneck(256, 128)
         self.upconv1 = nn.ConvTranspose2d(128, 64, kernel_size=2, stride=2)
-        self.dec1 = self.conv_block(128, 64)
+        self.dec1 = self.bottleneck(128, 64)
 
         # Final Convolution
         self.final_conv = nn.Conv2d(64, out_channels, kernel_size=1)
         self.activation = nn.Sigmoid()  # Sigmoid for pixel-wise probabilities
 
-    def conv_block(self, in_channels, out_channels):
+    def bottleneck(self, in_channels, out_channels):
         return nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
@@ -62,7 +62,7 @@ class UNet(nn.Module):
         enc2 = self.enc2(self.pool(enc1))
 
         # Convolution
-        bottleneck = self.conv_block(self.pool(enc2))
+        bottleneck = self.bottleneck(self.pool(enc2))
 
         # Decoder
         dec2 = self.upconv2(bottleneck)

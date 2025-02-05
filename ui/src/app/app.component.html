@@ -3,14 +3,27 @@
 <div class="ui-container">
   <h1>Go ahead. Try it on.</h1>
 
-  <p>To get the best results make sure you are in well light environment</p>
-  <div class="image-container">
-    <section class="reference-images image-slider">
+  <section class="image-container">
+    <div class="reference-images image-slider" *ngIf="!imageSelected">
       <div *ngFor="let image of reference_images; index as i"  class="image-slide">
         <button (click)="selectImage(reference_images[i])">
           <img [src]="image"/>
         </button>
       </div>
-    </section>
-  </div>
+    </div>
+  </section>
+  
+  <section class="image-uploader" *ngIf="imageSelected">
+    <div class="select-new-image" *ngIf="imageSelected">
+      <div class="selected-image-review">
+        <img [src]=selectedImage />
+      </div>
+      <button (click)="reselectImage()">Select a different image?</button>
+    </div>
+
+    <h3>Upload a selfie.</h3>
+    <p>
+      For best results make sure to use an image with a simple pose, avoid crossing arms over body and that you are in a well light environment and that your body is free of shadows. 
+    </p>
+  </section>
 </div>

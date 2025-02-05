@@ -3,7 +3,7 @@
 .ui-container {
 	width: 100vw;
 
-	h1 {
+	h1, p {
 		width: fit-content;
 		margin: auto;
 	}
@@ -29,5 +29,18 @@
 				scroll-snap-align: none center;
 			}
 		}
+
+		.select-new-image {
+			width: fit-content;
+			height: fit-content;
+			margin: 50% auto;
+		}
+	}
+
+	.image-uploader{
+		width: 350px;
+		height: fit-content;
+		margin: auto;
+		
 	}
 }

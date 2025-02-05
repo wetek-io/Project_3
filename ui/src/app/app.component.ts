@@ -7,13 +7,12 @@ import { RouterOutlet } from '@angular/router';
   standalone: true,
   imports: [RouterOutlet, CommonModule],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
 })
-
 export class AppComponent {
   title: string = 'ui';
   imageSelected: boolean = false;
-  selectedImage: string = ''
+  selectedImage: string = '';
 
   reference_images = [
     'https://ms-cdn2.maggiesottero.com/143357/High/Rebecca-Ingram-Adeline-Fit-and-Flare-Wedding-Dress-25RK278A01-PROMO1-IV.jpg',
@@ -21,18 +20,17 @@ export class AppComponent {
     'https://ms-cdn2.maggiesottero.com/143365/High/Rebecca-Ingram-Adeline-Sheath-Wedding-Dress-25RK278A01-Alt50-IV.jpg',
     'https://ms-cdn2.maggiesottero.com/143373/High/Rebecca-Ingram-Adeline-Sheath-Wedding-Dress-25RK278A01-Alt54-IV.jpg',
     'https://ms-cdn2.maggiesottero.com/143371/High/Rebecca-Ingram-Adeline-Sheath-Wedding-Dress-25RK278A01-Alt53-IV.jpg',
-  ]
+  ];
 
-  constructor(){}
+  constructor() {}
 
   selectImage(image: any) {
-    this.imageSelected = !this.imageSelected
-    this.selectedImage = image
-    console.log(image)
-
+    this.imageSelected = !this.imageSelected;
+    this.selectedImage = image;
+    console.log(image);
   }
-  
-  reselectImage(){
-    this.imageSelected = !this.imageSelected
+
+  reselectImage() {
+    this.imageSelected = !this.imageSelected;
   }
 }

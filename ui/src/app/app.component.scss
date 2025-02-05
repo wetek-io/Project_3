@@ -1,46 +1,48 @@
 // Style sheet for landing page
 
 .ui-container {
-	width: 100vw;
+  width: 100vw;
 
-	h1, p {
-		width: fit-content;
-		margin: auto;
-	}
+  h1,
+  h3,
+  p {
+    width: fit-content;
+    margin: auto;
+  }
+}
+.image-container {
+  display: inherit;
+  width: 100vw;
+  max-width: 375px;
+  margin: auto;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
 
-	.image-container {
-		display: inherit;
-		width: 100vw;
-		max-width: 375px;
-		margin: auto;
-		overflow-x: auto;
-		scroll-snap-type: x mandatory;
+  .image-slider {
+    display: grid;
+    width: 350px;
+    grid-auto-flow: column;
+    grid-auto-columns: 100%;
+    gap: 5px;
+    scroll-snap-align: start none;
 
-		.image-slider {
-			display: grid;
-			width: 350px;
-			grid-auto-flow: column;
-			grid-auto-columns: 100%;
-			gap: 5px;
-			scroll-snap-align: start none;
-			
-			.image-slide {
-				border-radius: 10px;
-				scroll-snap-align: none center;
-			}
-		}
+    .image-slide {
+      border-radius: 10px;
+      scroll-snap-align: none center;
+    }
+  }
 
-		.select-new-image {
-			width: fit-content;
-			height: fit-content;
-			margin: 50% auto;
-		}
-	}
+  .select-new-image {
+    width: fit-content;
+    height: fit-content;
+    margin: 50% auto;
+  }
+}
 
-	.image-uploader{
-		width: 350px;
-		height: fit-content;
-		margin: auto;
-		
-	}
+.image-uploader {
+  padding-top: 15px;
+  width: 350px;
+  height: fit-content;
+  margin: auto;
+  display: block;
 }

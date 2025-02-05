@@ -12,6 +12,7 @@ import { RouterOutlet } from '@angular/router';
 
 export class AppComponent {
   title: String = 'ui';
+  selectedImage: Boolean = false;
 
   reference_images = [
     'https://ms-cdn2.maggiesottero.com/143357/High/Rebecca-Ingram-Adeline-Fit-and-Flare-Wedding-Dress-25RK278A01-PROMO1-IV.jpg',
@@ -23,7 +24,8 @@ export class AppComponent {
 
   constructor(){}
 
-  selectedImage(image: any) {
+  selectImage(image: any) {
+    this.selectedImage = !this.selectedImage
     console.log(image)
   }
 }

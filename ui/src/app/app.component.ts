@@ -9,8 +9,9 @@ import { RouterOutlet } from '@angular/router';
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
+
 export class AppComponent {
-  title = 'ui';
+  title: String = 'ui';
 
   reference_images = [
     'https://ms-cdn2.maggiesottero.com/143357/High/Rebecca-Ingram-Adeline-Fit-and-Flare-Wedding-Dress-25RK278A01-PROMO1-IV.jpg',
@@ -21,4 +22,8 @@ export class AppComponent {
   ]
 
   constructor(){}
+
+  selectedImage(image: any) {
+    console.log(image)
+  }
 }

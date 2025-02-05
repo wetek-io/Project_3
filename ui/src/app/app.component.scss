@@ -1,39 +1,30 @@
 // Style sheet for landing page
 
-.nav-btn {
-	width: 15px;
-	height: 20px;
-	background-color: black;
-}
-
 .ui-container {
 	width: 100vw;
 
 	h1 {
+		width: fit-content;
 		margin: auto;
 	}
 
 	.image-container {
-		display: grid;
+		display: inherit;
 		width: 100vw;
-		max-width: 350px;
+		max-width: 375px;
 		margin: auto;
 		overflow-x: auto;
 		scroll-snap-type: x mandatory;
 
-		.arrow {
-			background: black;
-		}
-
 		.image-slider {
 			display: grid;
+			width: 350px;
 			grid-auto-flow: column;
 			grid-auto-columns: 100%;
 			gap: 5px;
 			scroll-snap-align: start none;
 			
 			.image-slide {
-				width: 100%;
 				border-radius: 10px;
 				scroll-snap-align: none center;
 			}

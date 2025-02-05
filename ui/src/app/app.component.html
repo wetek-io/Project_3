@@ -13,14 +13,17 @@
           *ngFor="let image of reference_images; index as i"
           class="image-slide"
         >
-          <button (click)="selectImage(reference_images[i])">
+          <button
+            [class.selected]="selectedImage === image"
+            (click)="selectImage(reference_images[i])"
+          >
             <img [src]="image" />
           </button>
         </div>
       </div>
     </div>
 
-    <div class="image-uploader" *ngIf="hasSelectedImage">
+    <div class="image-upload-container" *ngIf="hasSelectedImage">
       <h3>Upload a selfie.</h3>
       <p>
         For best results make sure to use an image with a simple pose, avoid
@@ -29,17 +32,16 @@
       </p>
 
       <br />
-      <label for="imageUploader">
-        Browser system or drag n' drop
+      <div class="image-uploader">
+        <span>Click to upload image</span>
         <input
           type="file"
           (change)="uploadImage($event)"
           accept="image/*"
           id="imageUploader"
           name="imageUploader"
-          value="Browser system or drag n' drop"
         />
-      </label>
+      </div>
       <br />
 
       <div class="uploaded-image-review">
@@ -47,9 +49,13 @@
       </div>
     </div>
   </section>
+  <br />
   <section class="image-generation-container" *ngIf="hasFinishedSelections">
-    <!-- python stuff -->
+    <button (click)="generateImage()" class="image-generator">
+      <span>Let see the bride!</span>
+    </button>
   </section>
+  <br />
 </div>
 
 <!-- This should be a the 'review' step. -->

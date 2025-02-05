@@ -28,7 +28,7 @@ export class AppComponent {
   constructor() {}
 
   selectImage(image: any) {
-    this.hasSelectedImage = !this.hasSelectedImage;
+    this.hasSelectedImage = true;
     this.selectedImage = image;
     console.log(image);
   }
@@ -40,12 +40,16 @@ export class AppComponent {
   uploadImage(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
-      this.hasFinishedSelections = !this.hasFinishedSelections;
+      this.hasFinishedSelections = true;
       const reader = new FileReader();
       reader.onload = () => {
         this.uploadedImage = reader.result;
       };
       reader.readAsDataURL(file);
     }
+  }
+
+  generateImage() {
+    console.log('It aint been built yet!');
   }
 }

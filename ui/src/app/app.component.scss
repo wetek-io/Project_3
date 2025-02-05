@@ -1,22 +1,27 @@
 // Style sheet for landing page
+h1,
+h3,
+p {
+  width: fit-content;
+  margin: auto;
+}
 
 .ui-container {
-  width: 100vw;
-
-  h1,
-  h3,
-  p {
-    width: fit-content;
-    margin: auto;
-  }
+  width: 95vw;
+  padding-top: 1.5rem;
+  margin: auto;
 }
-.image-container {
+
+.image-selection-container {
   display: inherit;
-  width: 100vw;
+  width: 100%;
   max-width: 375px;
   margin: auto;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
+
+  .reference-images {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
 
   .image-slider {
     display: grid;
@@ -32,17 +37,34 @@
     }
   }
 
-  .select-new-image {
-    width: fit-content;
+  .image-uploader {
+    padding-top: 15px;
+    width: 100%;
+    max-width: 350px;
     height: fit-content;
-    margin: 50% auto;
+    margin: auto;
+    position: static;
+
+    label {
+      display: flex;
+      width: fit-content;
+      background-color: rgba(169, 169, 169, 0.25);
+      border: 1px solid black;
+      border-radius: 5px;
+      padding: 5px;
+      cursor: pointer;
+      margin: auto;
+
+      input[type="file"] {
+        display: none;
+      }
+    }
   }
 }
-
-.image-uploader {
-  padding-top: 15px;
-  width: 350px;
-  height: fit-content;
+.selection-reviews-container {
+  display: inline-grid;
+  grid-auto-columns: 50% 50%;
+  width: 100%;
+  max-width: 450px;
   margin: auto;
-  display: block;
 }

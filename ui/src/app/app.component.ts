@@ -11,8 +11,11 @@ import { RouterOutlet } from '@angular/router';
 })
 export class AppComponent {
   title: string = 'ui';
-  imageSelected: boolean = false;
+  hasSelectedImage: boolean = false;
+  hasUploadedImage: boolean = false;
+  hasFinishedSelections: boolean = false;
   selectedImage: string = '';
+  uploadedImage: string | ArrayBuffer | null = null;
 
   reference_images = [
     'https://ms-cdn2.maggiesottero.com/143357/High/Rebecca-Ingram-Adeline-Fit-and-Flare-Wedding-Dress-25RK278A01-PROMO1-IV.jpg',
@@ -25,12 +28,24 @@ export class AppComponent {
   constructor() {}
 
   selectImage(image: any) {
-    this.imageSelected = !this.imageSelected;
+    this.hasSelectedImage = !this.hasSelectedImage;
     this.selectedImage = image;
     console.log(image);
   }
 
   reselectImage() {
-    this.imageSelected = !this.imageSelected;
+    this.hasSelectedImage = !this.hasSelectedImage;
+  }
+
+  uploadImage(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      this.hasFinishedSelections = !this.hasFinishedSelections;
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.uploadedImage = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
   }
 }

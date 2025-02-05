@@ -36,7 +36,7 @@ class UNet(nn.Module):
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
 
         # Convolution
-        self.bottleneck = self.bottleneck(128, 256)
+        self.conv_btlnk = self.bottleneck(128, 256)
 
         # Decoder
         self.upconv2 = nn.ConvTranspose2d(256, 128, kernel_size=2, stride=2)
@@ -62,7 +62,7 @@ class UNet(nn.Module):
         enc2 = self.enc2(self.pool(enc1))
 
         # Convolution
-        bottleneck = self.bottleneck(self.pool(enc2))
+        bottleneck = self.conv_block(self.pool(enc2))
 
         # Decoder
         dec2 = self.upconv2(bottleneck)
@@ -70,10 +70,7 @@ class UNet(nn.Module):
         dec1 = self.upconv1(dec2)
         dec1 = self.dec1(torch.cat([dec1, enc1], dim=1))
 
-        # Output
-        output = self.activation(self.final_conv(dec1))
-
-        return output
+        return self.final_conv(dec1)
 
 
 class SegmentationDataset(Dataset):

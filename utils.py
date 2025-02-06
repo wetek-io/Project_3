@@ -57,6 +57,7 @@ class UNet(nn.Module):
         )
 
     def forward(self, x):
+
         # Encoder
         enc1 = self.enc1(x)
         enc2 = self.enc2(self.pool(enc1))

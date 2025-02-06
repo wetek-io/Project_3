@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, provideHttpClient, withFetch } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
@@ -7,6 +7,7 @@ import { RouterOutlet } from '@angular/router';
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet, CommonModule],
+
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
@@ -54,30 +55,16 @@ export class AppComponent {
     const api = 'http://127.0.0.1:8000/try-on/';
     const formData = new FormData();
 
-    // Fetch reference image as a Blob
-    fetch(this.selectedImage)
-      .then((response) => response.blob())
-      .then((referenceBlob) => {
-        // Append reference image Blob
-        formData.append(
-          'reference_image',
-          referenceBlob,
-          'reference_image.jpg'
-        );
+    formData.append('reference_image', this.selectedImage); // Pass URL directly
+    if (this.uploadedImage) {
+      const userBlob = this.dataURLtoBlob(this.uploadedImage as string);
+      formData.append('user_image', userBlob, 'user_image.jpg');
+    }
 
-        // Append user image Blob
-        if (this.uploadedImage) {
-          // Convert base64 to Blob
-          const userBlob = this.dataURLtoBlob(this.uploadedImage as string);
-          formData.append('user_image', userBlob, 'user_image.jpg');
-        }
-
-        // Send to backend
-        this.http.post(api, formData).subscribe({
-          next: (response) => console.log('API Response:', response),
-          error: (err) => console.error('Error:', err),
-        });
-      });
+    this.http.post(api, formData).subscribe({
+      next: (response) => console.log('API Response:', response),
+      error: (err) => console.error('Error:', err),
+    });
   }
 
   // Display the processed image

@@ -3,7 +3,8 @@
 # Notes for Keri: Steven
 
 This app is using Angular18 for the front end. I chose this specifically for the easy of
-client. This allows a client, Maggie Sottero, to only need to supply what they already have, the image link, which we save as a raw image from the front-end which is sent to the GMM
+client. This allows a client, Maggie Sottero, to only need to supply what they already have, the image link. The reference_image url and the user's uploaded image are sent unchanged to
+the api endpoint directly. The back-end handles every aspect of data handling, front end only sends and receives living them loosely coupled leaving the api, front and back-end highly scalable, and manageable with minimal effort.
 
 # Model Pipeline
 

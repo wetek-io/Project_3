@@ -1,8 +1,10 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
+from fastapi import HTTPException
 from pathlib import Path
 import numpy as np
+import requests
 import torch
 import cv2
 import io
@@ -69,32 +71,37 @@ async def root():
 
 
 @app.post("/try-on")
-async def try_on(
-    user_image: UploadFile = File(...),
-    reference_image: UploadFile = File(...),
-):
-    """
-    Try on a clothing item on a person image.
+async def try_on(user_image: UploadFile = File(...), reference_image: str = Form(...)):
+    # Handle reference_image
+    if reference_image.startswith("http"):
+        try:
+            response = requests.get(reference_image)
+            if response.status_code != 200:
+                raise HTTPException(
+                    status_code=400, detail="Failed to fetch reference image from URL"
+                )
+            ref_img_data = response.content
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, detail=f"Error fetching reference image: {str(e)}"
+            )
+    else:
+        # Assume it's a direct upload if not a URL
+        ref_img_data = await reference_image.read()
 
-    Parameters:
-    - user_image: Image of the person
-    - reference_image: Image of the clothing item
-
-    Returns:
-    - Image file with the clothing item warped onto the person
-    """
-    # Process uploaded images
-    ref_img_data = await reference_image.read()
+    # Process user_image
     user_img_data = await user_image.read()
 
-    # Convert image bytes to numpy arrays
+    # Decode images
     ref_img = cv2.imdecode(np.frombuffer(ref_img_data, np.uint8), cv2.IMREAD_COLOR)
     user_img = cv2.imdecode(np.frombuffer(user_img_data, np.uint8), cv2.IMREAD_COLOR)
 
-    if ref_img is None or user_img is None:
-        raise HTTPException(
-            status_code=400, detail="Uploaded files are not valid images"
-        )
+    # Resize images
+    ref_img = cv2.resize(ref_img, (192, 256))
+    user_img = cv2.resize(user_img, (192, 256))
+
+    print(f"Ref Image Shape: {ref_img.shape}")
+    print(f"User Image Shape: {user_img.shape}")
 
     # Get pose points
     try:
@@ -102,26 +109,32 @@ async def try_on(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Pose detection failed: {str(e)}")
 
-    # Check critical keypoints
-    keypoints = [2, 5, 8, 11]  # Example indices for shoulders and hips
-    if not all(k in pose_points for k in keypoints):
-        raise HTTPException(
-            status_code=400,
-            detail="Missing critical pose keypoints in the person image",
-        )
+    # Define the critical keypoints
+    keypoints = [2, 5, 8, 11]  # Shoulders and hips
 
-    # Resize images to match GMM input dimensions
-    ref_img_resized = cv2.resize(ref_img, (192, 256))
-    user_img_resized = cv2.resize(user_img, (192, 256))
+    # Estimate or assign default values for missing keypoints
+    for k in keypoints:
+        if k not in pose_points:
+            if k == 2:  # Left shoulder
+                pose_points[k] = estimate_keypoint(pose_points, 8, 5)
+            elif k == 5:  # Right shoulder
+                pose_points[k] = estimate_keypoint(pose_points, 11, 2)
+            elif k == 8:  # Left hip
+                pose_points[k] = estimate_keypoint(pose_points, 2, 11)
+            elif k == 11:  # Right hip
+                pose_points[k] = estimate_keypoint(pose_points, 5, 8)
+            else:
+                pose_points[k] = (0, 0)  # Assign default if estimation fails
+
+    # Log and continue
+    print(f"Pose points after estimation: {pose_points}")
 
     # Convert images to tensors
     ref_tensor = (
-        torch.FloatTensor(ref_img_resized).permute(2, 0, 1).unsqueeze(0).to(device)
-        / 255.0
+        torch.FloatTensor(ref_img).permute(2, 0, 1).unsqueeze(0).to(device) / 255.0
     )
     user_tensor = (
-        torch.FloatTensor(user_img_resized).permute(2, 0, 1).unsqueeze(0).to(device)
-        / 255.0
+        torch.FloatTensor(user_img).permute(2, 0, 1).unsqueeze(0).to(device) / 255.0
     )
 
     # Validate tensor shapes
@@ -159,3 +172,11 @@ async def try_on(
         media_type="image/jpg",
         headers={"Content-Disposition": "attachment; filename=blended_result.jpg"},
     )
+
+
+def estimate_keypoint(pose_points, k1, k2):
+    if k1 in pose_points and k2 in pose_points:
+        x = (pose_points[k1][0] + pose_points[k2][0]) // 2
+        y = (pose_points[k1][1] + pose_points[k2][1]) // 2
+        return (x, y)
+    return None

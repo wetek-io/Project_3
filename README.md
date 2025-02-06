@@ -4,7 +4,7 @@
 
 This app is using Angular18 for the front end. I chose this specifically for the easy of
 client. This allows a client, Maggie Sottero, to only need to supply what they already have, the image link. The reference_image url and the user's uploaded image are sent unchanged to
-the api endpoint directly. The back-end handles every aspect of data handling, front end only sends and receives living them loosely coupled leaving the api, front and back-end highly scalable, and manageable with minimal effort.
+the api endpoint directly. The front end only sends and receives data, keeping it loosely coupled from the API and back-end, ensuring scalability.
 
 # Model Pipeline
 
@@ -12,8 +12,7 @@ Image ML for virtual Gown try on.
 
 **From A High Level**
 
-This app is ment to allow brides to try on gown virtually while visiting our website. This project
-uses a custom UNet model which will be trained on the Meta AI segmentation dataset SA-1B.
+This app is meant to allow brides to try on gown virtually while visiting our website. This project uses a custom UNet model which will be trained on the Meta AI segmentation dataset SA-1B.
 
 The model needs to be pre-trained for the app.
 
@@ -30,7 +29,7 @@ This is a multi(4) model application.
 - Segmentation ([Convolutional Neural Network]('utils.py')):
 
   - [Image-to-Image G]
-  - A CNN is especially adapt at edge detection such as the edge of a dress of body part.
+  - A CNN is especially adept at edge detection such as the edge of a dress of body part.
   - This project uses a model based on the pytorch tutorial model. This is a good starting
     point for a custom CNN build. This model is currently only taking one input and applying
     softmax with a dimension of one
@@ -58,14 +57,25 @@ This is a multi(4) model application.
 ## training data
 
 - [SA-1B](https://ai.meta.com/datasets/segment-anything-downloads/)
-- [tensorflow](https://tensorflow.google.cn/datasets/catalog/segment_anything)
-
   - A Meta AI dataset with 11M images and 1.1B mask annotations.
 
 ## Purpose
 
-To bring brides just a little something extra. Let them see themselves in that perfect dress on that
-perfect day.
+To bring brides just a little something extra. Let them see themselves in that perfect dress on that perfect day.
+
+## Why this approach
+
+- Agnostic Segmentation: The app is not tied to specific brands or clothing styles, making it universally adaptable for any product line.
+
+- Minimal Client-Side Requirements: Clients only need to provide image URLs of their products, drastically reducing onboarding complexity and setup time.
+
+- Scalable and Modular Architecture: Loosely coupled front-end, API, and back-end components allow for seamless scaling and efficient maintenance.
+
+- Pre-Trained Model Integration: Leveraging pre-trained models ensures a faster time-to-market while retaining room for customization and improvement.
+
+- User-Centric Design: The interface is intuitive, allowing brides to upload a single photo and instantly see results without needing complex inputs.
+
+- Future-Ready Framework: Built with Angular18 and modular design principles, the app is prepared for rapid iteration and feature expansion.
 
 ## Workflow
 
@@ -97,23 +107,24 @@ Example Flow Visualization 1.
 
 - Welcome Screen:
   - Title:
-    - “Welcome to the Image Segmentation Tool!”
-  - Button:
-    - “Get Started”
+    - “Go ahead. Try it on.”
+  - Image Slider:
+    - These are client product image i.e. Maggie Sottero wedding dress
+    - reference_image
+    - User interacts with slider until to select a reference_image
   - Upload:
-    - Drag-and-drop or click to upload.
-  - Preview:
-    - Uploaded image is shown.
-  - Results:
+    - This section is hidden until the user has selected a reference_image
+    - They can either drag-and-drop or click to upload.
+    - Users user_image is displayed under the the upload CTA
+  - Image Generation
+    - both reference_image and user_image are sent to the backend models via the fastapi endpoint
+      - AI machine stuff magic
+  - Display Results:
     - Spinner with “Processing…” message.
     - Display image of bride in dress.
-    - Option to download or share.
   - Next Steps:
-    - “Upload Another” or “Try Advanced Tools.”
-
-## Deployment
-
-## CI/CD
+    - Option to download or share.
+    - “Upload Another” or “Try Advanced Tools. (Future)”
 
 ## Env Reset
 
@@ -125,6 +136,32 @@ conda env create -f env.yml -y
 conda activate project_3
 conda clean --all --yes
 ```
+
+## Local Deployment
+
+To run locally you will need to manually start both the fastapi server and the angular server.
+
+fastapi:
+
+```bash
+conda activate project_3 # if applicable
+fastapi dev api.py
+```
+
+angular(ui):
+
+```bash
+cd ui
+ng serve
+```
+
+## Remote Deployment
+
+This app will be entirely deployed from a DigitalOcean GPU droplet
+
+## CI/CD
+
+None at the moment. Future plans include automation for CI/CD
 
 ### Research:
 
@@ -142,7 +179,7 @@ conda clean --all --yes
 
 - [Convolutional Image Segmentation](https://arxiv.org/pdf/1706.05587v3)
 
-## Focus Areas for the 2.5-Week Timeline:
+## Focus Areas for the 2 Week Timeline:
 
 1. Pose Detection & Body Segmentation: Use pre-trained models to save time.
 
@@ -152,7 +189,7 @@ conda clean --all --yes
 
 4. Testing & Iteration: Prioritize basic functionality over perfection.
 
-## Team Breakdown and Task Assignments
+# Team Breakdown and Task Assignments
 
 ## Pose Detection & Keypoints Extraction (JD, Roger):
 
@@ -178,7 +215,7 @@ Tasks:
 - Deliverable: API/module to return body masks from uploaded images.
 - Time Allocation: 4 days.
 
-## Gown Overlay and Warping (Keri, Dane):
+## Gown Overlay and Warping (Keri):
 
 Goal: Develop a module to overlay and align the gown with the detected pose.
 Tools: Use simple transformations (e.g., Thin Plate Splines or Affine Transformations).

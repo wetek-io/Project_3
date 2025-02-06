@@ -1,8 +1,11 @@
 # Project_3
 
+# Model Pipeline
+
 Image ML for virtual Gown try on.
 
 **From A High Level**
+
 This app is ment to allow brides to try on gown virtually while visiting our website. This project
 uses a custom UNet model which will be trained on the Meta AI segmentation dataset SA-1B.
 

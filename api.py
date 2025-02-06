@@ -83,72 +83,79 @@ async def try_on(
     Returns:
     - Image file with the clothing item warped onto the person
     """
+    # Process uploaded images
+    ref_img_data = await reference_image.read()
+    user_img_data = await user_image.read()
+
+    # Convert image bytes to numpy arrays
+    ref_img = cv2.imdecode(np.frombuffer(ref_img_data, np.uint8), cv2.IMREAD_COLOR)
+    user_img = cv2.imdecode(np.frombuffer(user_img_data, np.uint8), cv2.IMREAD_COLOR)
+
+    if ref_img is None or user_img is None:
+        raise HTTPException(
+            status_code=400, detail="Uploaded files are not valid images"
+        )
+
+    # Get pose points
     try:
-        # Process uploaded images
-        user_img = process_uploaded_image(user_image)
-        ref_img = process_uploaded_image(reference_image)
-        print(user_img)
-        print(ref_img)
-        # Get pose points
         pose_points = pose_detector.detect(user_img)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Pose detection failed: {str(e)}")
 
-        # Check key points
-        keypoints = [2, 5, 8, 11]  # Example indices for shoulders and hips
-        if not all(k in pose_points for k in keypoints):
-            raise HTTPException(
-                status_code=400,
-                detail="Missing critical pose keypoints in the person image",
-            )
-
-        # Resize reference and user image to make GMM input
-        ref_img = cv2.resize(ref_img, (192, 256))
-        user_img = cv2.resize(user_img, (192, 256))
-
-        # Convert images to tensors
-        ref_tensor = (
-            torch.FloatTensor(ref_img).permute(2, 0, 1).unsqueeze(0).to(device) / 255.0
-        )
-        user_tensor = (
-            torch.FloatTensor(user_img).permute(2, 0, 1).unsqueeze(0).to(device) / 255.0
+    # Check critical keypoints
+    keypoints = [2, 5, 8, 11]  # Example indices for shoulders and hips
+    if not all(k in pose_points for k in keypoints):
+        raise HTTPException(
+            status_code=400,
+            detail="Missing critical pose keypoints in the person image",
         )
 
-        # Validate user_tensor
-        if user_tensor.shape[1:] != (3, 192, 256) or ref_tensor.shape[1:] != (
-            3,
-            192,
-            256,
-        ):
-            raise HTTPException(
-                status_code=400, detail="Input tensors have unexpected dimensions"
-            )
+    # Resize images to match GMM input dimensions
+    ref_img_resized = cv2.resize(ref_img, (192, 256))
+    user_img_resized = cv2.resize(user_img, (192, 256))
 
-        # Run GMM model
+    # Convert images to tensors
+    ref_tensor = (
+        torch.FloatTensor(ref_img_resized).permute(2, 0, 1).unsqueeze(0).to(device)
+        / 255.0
+    )
+    user_tensor = (
+        torch.FloatTensor(user_img_resized).permute(2, 0, 1).unsqueeze(0).to(device)
+        / 255.0
+    )
+
+    # Validate tensor shapes
+    if ref_tensor.shape[1:] != (3, 192, 256) or user_tensor.shape[1:] != (3, 192, 256):
+        raise HTTPException(
+            status_code=400, detail="Input tensors have unexpected dimensions"
+        )
+
+    # Run GMM model
+    try:
         with torch.no_grad():
             theta = gmm_model(user_tensor, ref_tensor)
             warped_ref = tps_transform(theta, ref_tensor)
             warped_ref_np = warped_ref.squeeze().cpu().numpy().transpose(1, 2, 0) * 255
-            warped_ref_np = (warped_ref_np).astype(np.uint8)
-
-        # Resize warped shirt to original size
-        warped_ref_resized = cv2.resize(
-            warped_ref_np, (user_img.shape[1], user_img.shape[0])
+            warped_ref_np = warped_ref_np.astype(np.uint8)
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"GMM model execution failed: {str(e)}"
         )
 
-        # Blend and weight reference and user images
-        blended_img = cv2.addWeighted(user_img, 0.7, warped_ref_resized, 0.3, 0)
+    # Resize warped clothing to the original user image size
+    warped_ref_resized = cv2.resize(
+        warped_ref_np, (user_img.shape[1], user_img.shape[0])
+    )
 
-        # Save blended image
-        output_path = output_dir / "blended_result.jpg"
-        cv2.imwrite(str(output_path), blended_img)
+    # Blend images
+    blended_img = cv2.addWeighted(user_img, 0.7, warped_ref_resized, 0.3, 0)
 
-        # Encode the image and stream it
-        _, buffer = cv2.imencode(".png", blended_img)
-        stream = io.BytesIO(buffer)
-        return StreamingResponse(
-            stream,
-            media_type="image/jpg",
-            headers={"Content-Disposition": "attachment; filename=blended_result.jpg"},
-        )
-    finally:
-        user_image.file.close()
-        reference_image.file.close()
+    # Encode blended image to stream
+    _, buffer = cv2.imencode(".jpg", blended_img)
+    stream = io.BytesIO(buffer)
+
+    return StreamingResponse(
+        stream,
+        media_type="image/jpg",
+        headers={"Content-Disposition": "attachment; filename=blended_result.jpg"},
+    )

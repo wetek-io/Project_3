@@ -51,15 +51,54 @@ export class AppComponent {
   }
 
   generateImage() {
-    const api = 'http://127.0.0.1:8000/try-on';
-    const post_images = {
-      reference_image: this.selectImage,
-      user_image: this.uploadedImage,
-    };
-    console.log(post_images);
-    this.http.post(api, post_images).subscribe({
-      next: (response) => console.log('API Response:', response),
-      error: (err) => console.error('Error:', err),
-    });
+    const api = 'http://127.0.0.1:8000/try-on/';
+    const formData = new FormData();
+
+    // Fetch reference image as a Blob
+    fetch(this.selectedImage)
+      .then((response) => response.blob())
+      .then((referenceBlob) => {
+        // Append reference image Blob
+        formData.append(
+          'reference_image',
+          referenceBlob,
+          'reference_image.jpg'
+        );
+
+        // Append user image Blob
+        if (this.uploadedImage) {
+          // Convert base64 to Blob
+          const userBlob = this.dataURLtoBlob(this.uploadedImage as string);
+          formData.append('user_image', userBlob, 'user_image.jpg');
+        }
+
+        // Send to backend
+        this.http.post(api, formData).subscribe({
+          next: (response) => console.log('API Response:', response),
+          error: (err) => console.error('Error:', err),
+        });
+      });
+  }
+
+  // Display the processed image
+  displayProcessedImage(imageUrl: string) {
+    const imgElement = document.getElementById(
+      'processedImage'
+    ) as HTMLImageElement;
+    imgElement.src = imageUrl;
+  }
+
+  // Helper function to convert base64 to Blob
+  dataURLtoBlob(dataURL: string): Blob {
+    const byteString = atob(dataURL.split(',')[1]);
+    const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
+    const arrayBuffer = new ArrayBuffer(byteString.length);
+    const uintArray = new Uint8Array(arrayBuffer);
+
+    for (let i = 0; i < byteString.length; i++) {
+      uintArray[i] = byteString.charCodeAt(i);
+    }
+
+    return new Blob([arrayBuffer], { type: mimeString });
   }
 }

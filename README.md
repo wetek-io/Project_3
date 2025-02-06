@@ -1,5 +1,10 @@
 # Project_3
 
+# Notes for Keri: Steven
+
+This app is using Angular18 for the front end. I chose this specifically for the easy of
+client. This allows a client, Maggie Sottero, to only need to supply what they already have, the image link, which we save as a raw image from the front-end which is sent to the GMM
+
 # Model Pipeline
 
 Image ML for virtual Gown try on.

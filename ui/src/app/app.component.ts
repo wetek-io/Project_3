@@ -56,7 +56,7 @@ export class AppComponent {
       reference_image: this.selectImage,
       user_image: this.uploadedImage,
     };
-
+    console.log(post_images);
     this.http.post(api, post_images).subscribe({
       next: (response) => console.log('API Response:', response),
       error: (err) => console.error('Error:', err),

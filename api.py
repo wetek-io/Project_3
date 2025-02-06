@@ -22,7 +22,7 @@ app = FastAPI(title="Virtual Try-On API")
 # Handle CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:4200"],  # Angular's dev server
+    allow_origins=["*"],  # Angular's dev server
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -68,7 +68,7 @@ async def root():
     }
 
 
-@app.post("/try-on/")
+@app.post("/try-on")
 async def try_on(
     user_image: UploadFile = File(...),
     reference_image: UploadFile = File(...),
@@ -138,7 +138,7 @@ async def try_on(
         blended_img = cv2.addWeighted(user_img, 0.7, warped_ref_resized, 0.3, 0)
 
         # Save blended image
-        output_path = output_dir / "blended_results.png"
+        output_path = output_dir / "blended_result.jpg"
         cv2.imwrite(str(output_path), blended_img)
 
         # Encode the image and stream it
@@ -146,8 +146,8 @@ async def try_on(
         stream = io.BytesIO(buffer)
         return StreamingResponse(
             stream,
-            media_type="image/png",
-            headers={"Content-Disposition": "attachment; filename=try_on_result.png"},
+            media_type="image/jpg",
+            headers={"Content-Disposition": "attachment; filename=blended_result.jpg"},
         )
     finally:
         user_image.file.close()

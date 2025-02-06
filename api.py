@@ -1,19 +1,24 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import StreamingResponse
-from gmm import load_gmm, tps_transform
 from pathlib import Path
 import numpy as np
 import torch
 import cv2
 import io
+import os
+import sys
+
+# Add the project root to sys.path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # local
-from utilities import posedetector
+from utils.posedetector import PoseDetector
+from utils.gmm import load_gmm, tps_transform
 
 app = FastAPI(title="Virtual Try-On API")
 
 # Initialize models
-pose_detector = posedetector.PoseDetector(model_path="models/graph_opt.pb")
+pose_detector = PoseDetector(model_path="models/graph_opt.pb")
 gmm_model = load_gmm("models/gmm_final.pth")
 
 # Move GMM model to GPU (H100)

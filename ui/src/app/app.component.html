@@ -1,6 +1,11 @@
 <!-- Landing page -->
 
 <div class="ui-container">
+  <section class="image-generation-container">
+    <button (click)="generateImage()" class="image-generator">
+      <span>Let see the bride!</span>
+    </button>
+  </section>
   <h1>Go ahead. Try it on.</h1>
   <br />
   <p>Select a reference image</p>
@@ -50,11 +55,7 @@
     </div>
   </section>
   <br />
-  <section class="image-generation-container" *ngIf="hasFinishedSelections">
-    <button (click)="generateImage()" class="image-generator">
-      <span>Let see the bride!</span>
-    </button>
-  </section>
+
   <br />
 </div>
 

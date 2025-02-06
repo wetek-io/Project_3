@@ -1,4 +1,5 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pathlib import Path
 import numpy as np
@@ -15,7 +16,17 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 from utils.posedetector import PoseDetector
 from utils.gmm import load_gmm, tps_transform
 
+# Initiate app
 app = FastAPI(title="Virtual Try-On API")
+
+# Handle CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:4200"],  # Angular's dev server
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Initialize models
 pose_detector = PoseDetector(model_path="models/graph_opt.pb")

@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
@@ -25,7 +26,7 @@ export class AppComponent {
     'https://ms-cdn2.maggiesottero.com/143371/High/Rebecca-Ingram-Adeline-Sheath-Wedding-Dress-25RK278A01-Alt53-IV.jpg',
   ];
 
-  constructor() {}
+  constructor(private http: HttpClient) {}
 
   selectImage(image: any) {
     this.hasSelectedImage = true;
@@ -50,6 +51,15 @@ export class AppComponent {
   }
 
   generateImage() {
-    console.log('It aint been built yet!');
+    const api = 'http://127.0.0.1:8000/try-on/';
+    const post_images = {
+      reference_image: this.selectImage,
+      user_image: this.uploadedImage,
+    };
+
+    this.http.post(api, post_images).subscribe({
+      next: (response) => console.log('API Response:', response),
+      error: (err) => console.error('Error:', err),
+    });
   }
 }

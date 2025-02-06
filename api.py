@@ -87,7 +87,8 @@ async def try_on(
         # Process uploaded images
         user_img = process_uploaded_image(user_image)
         ref_img = process_uploaded_image(reference_image)
-
+        print(user_img)
+        print(ref_img)
         # Get pose points
         pose_points = pose_detector.detect(user_img)
 

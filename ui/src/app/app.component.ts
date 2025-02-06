@@ -51,7 +51,7 @@ export class AppComponent {
   }
 
   generateImage() {
-    const api = 'http://127.0.0.1:8000/try-on/';
+    const api = 'http://127.0.0.1:8000/try-on';
     const post_images = {
       reference_image: this.selectImage,
       user_image: this.uploadedImage,

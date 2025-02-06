@@ -114,10 +114,13 @@ class SegmentationDataset(Dataset):
         mask_path = os.path.join(self.img_dir, mask_name)
         with open(mask_path, "r") as f:
             mask = self._create_mask(json.load(f), image.size)
+
         # Apply image transformations
         image = self.transform(image)
+
         # Ensure mask is a NumPy array with correct dtype
         mask = np.array(mask, dtype=np.uint8)
+
         # Resize the mask correctly
         w, h = image.shape[1], image.shape[2]  # Image tensor is (C, H, W)
         mask = TF.resize(Image.fromarray(mask), (h, w))  # Resize with (H, W)

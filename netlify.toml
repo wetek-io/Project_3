@@ -1,6 +1,6 @@
 # Define the base directory and publish folder
 [build]
-base = "/"
+base = "/ui"
 command = "npm run build"
 publish = "/ui/dist"
 

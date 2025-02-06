@@ -1,27 +1,19 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import StreamingResponse
+from gmm import load_gmm, tps_transform
 from pathlib import Path
-from PIL import Image
 import numpy as np
-import tempfile
 import torch
 import cv2
-import os
 import io
 
-from try_on import (
-    create_body_mask,
-    create_torso_mask,
-    create_face_hair_mask,
-    prepare_person_representation,
-)
-from posedetector import PoseDetector
-from gmm import load_gmm, tps_transform
+# local
+from utilities import posedetector
 
 app = FastAPI(title="Virtual Try-On API")
 
 # Initialize models
-pose_detector = PoseDetector(model_path="models/graph_opt.pb")
+pose_detector = posedetector.PoseDetector(model_path="models/graph_opt.pb")
 gmm_model = load_gmm("models/gmm_final.pth")
 
 # Move GMM model to GPU (H100)
@@ -34,18 +26,15 @@ output_dir.mkdir(exist_ok=True)
 
 
 def process_uploaded_image(file: UploadFile) -> np.ndarray:
-    """Convert uploaded file to numpy array."""
-    # Read image file
+    """
+    Reads uploaded user file, converts contents to
+    numpy array, which is then used to decode the
+    array, and returns RGB image.
+    """
     contents = file.file.read()
-
-    # Convert to numpy array
     nparr = np.frombuffer(contents, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
-    # Convert to RGB
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-    return img
+    return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
 
 @app.get("/")
@@ -55,6 +44,7 @@ async def root():
         "name": "Virtual Try-On API",
         "version": "1.0.0",
         "description": "API for trying on clothing items on person images",
+        "redirects": {},
         "endpoints": {
             "/try-on": "POST - Try on a clothing item",
             "/": "GET - This information",
@@ -64,92 +54,84 @@ async def root():
 
 @app.post("/try-on/")
 async def try_on(
-    person_image: UploadFile = File(...),
-    clothing_image: UploadFile = File(...),
+    user_image: UploadFile = File(...),
+    reference_image: UploadFile = File(...),
 ):
     """
     Try on a clothing item on a person image.
 
     Parameters:
-    - person_image: Image of the person
-    - clothing_image: Image of the clothing item
+    - user_image: Image of the person
+    - reference_image: Image of the clothing item
 
     Returns:
     - Image file with the clothing item warped onto the person
     """
     try:
         # Process uploaded images
-        person_img = process_uploaded_image(person_image)
-        shirt_img = process_uploaded_image(clothing_image)
+        user_img = process_uploaded_image(user_image)
+        ref_img = process_uploaded_image(reference_image)
 
         # Get pose points
-        pose_points = pose_detector.detect(person_img)
+        pose_points = pose_detector.detect(user_img)
 
-        if not pose_points or None in [
-            pose_points[i] for i in [2, 5, 8, 11]
-        ]:  # Check key points
+        # Check key points
+        keypoints = [2, 5, 8, 11]  # Example indices for shoulders and hips
+        if not all(k in pose_points for k in keypoints):
             raise HTTPException(
-                status_code=400, detail="Could not detect pose in the person image"
+                status_code=400,
+                detail="Missing critical pose keypoints in the person image",
             )
 
-        # Create masks
-        body_mask = create_body_mask(
-            pose_points, person_img.shape[0], person_img.shape[1]
-        )
-        torso_mask = create_torso_mask(
-            pose_points, person_img.shape[0], person_img.shape[1]
-        )
-        face_hair_mask = create_face_hair_mask(pose_points, person_img)
+        # Resize reference and user image to make GMM input
+        ref_img = cv2.resize(ref_img, (192, 256))
+        user_img = cv2.resize(user_img, (192, 256))
 
-        # Prepare person representation
-        person_representation = prepare_person_representation(
-            pose_points, torso_mask, face_hair_mask
+        # Convert images to tensors
+        ref_tensor = (
+            torch.FloatTensor(ref_img).permute(2, 0, 1).unsqueeze(0).to(device) / 255.0
+        )
+        user_tensor = (
+            torch.FloatTensor(user_img).permute(2, 0, 1).unsqueeze(0).to(device) / 255.0
         )
 
-        # Prepare clothing image
-        shirt_img = cv2.resize(shirt_img, (192, 256))
-        shirt_tensor = (
-            torch.FloatTensor(shirt_img).permute(2, 0, 1).unsqueeze(0) / 255.0
-        )
+        # Validate user_tensor
+        if user_tensor.shape[1:] != (3, 192, 256) or ref_tensor.shape[1:] != (
+            3,
+            192,
+            256,
+        ):
+            raise HTTPException(
+                status_code=400, detail="Input tensors have unexpected dimensions"
+            )
 
         # Run GMM model
         with torch.no_grad():
-            theta = gmm_model(person_representation, shirt_tensor)
-            warped_shirt = tps_transform(theta, shirt_tensor)
+            theta = gmm_model(user_tensor, ref_tensor)
+            warped_ref = tps_transform(theta, ref_tensor)
+            warped_ref_np = warped_ref.squeeze().cpu().numpy().transpose(1, 2, 0) * 255
+            warped_ref_np = (warped_ref_np).astype(np.uint8)
 
-            # Convert warped shirt to numpy
-            warped_shirt_np = warped_shirt.squeeze().cpu().numpy()
-            warped_shirt_np = warped_shirt_np.transpose(1, 2, 0)
-            warped_shirt_np = (warped_shirt_np * 255).astype(np.uint8)
+        # Resize warped shirt to original size
+        warped_ref_resized = cv2.resize(
+            warped_ref_np, (user_img.shape[1], user_img.shape[0])
+        )
 
-            # Resize warped shirt to original size
-            warped_shirt_full = cv2.resize(
-                warped_shirt_np, (person_img.shape[1], person_img.shape[0])
-            )
+        # Blend and weight reference and user images
+        blended_img = cv2.addWeighted(user_img, 0.7, warped_ref_resized, 0.3, 0)
 
-            # Create 3-channel torso mask and blend
-            torso_mask_3ch = np.stack([torso_mask] * 3, axis=-1)
-            warped_shirt_masked = warped_shirt_full * torso_mask_3ch
-            result = warped_shirt_masked + person_img * (1 - torso_mask_3ch)
+        # Save blended image
+        output_path = output_dir / "blended_results.png"
+        cv2.imwrite(str(output_path), blended_img)
 
-            # Convert to BGR for saving
-            result_bgr = cv2.cvtColor(result.astype(np.uint8), cv2.COLOR_RGB2BGR)
-
-            # Encode the image and stream it
-            _, buffer = cv2.imencode(".png", result_bgr)
-            stream = io.BytesIO(buffer)
-            return StreamingResponse(
-                stream,
-                media_type="image/png",
-                headers={
-                    "Content-Disposition": "attachment; filename=try_on_result.png"
-                },
-            )
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
+        # Encode the image and stream it
+        _, buffer = cv2.imencode(".png", blended_img)
+        stream = io.BytesIO(buffer)
+        return StreamingResponse(
+            stream,
+            media_type="image/png",
+            headers={"Content-Disposition": "attachment; filename=try_on_result.png"},
+        )
     finally:
-        # Close the uploaded files
-        person_image.file.close()
-        clothing_image.file.close()
+        user_image.file.close()
+        reference_image.file.close()

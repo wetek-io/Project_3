@@ -19,7 +19,7 @@ When a user uploads an image it will will be segmented by the model in parallel 
 
 ## model selection
 
-This is a multi(3) model application.
+This is a multi(4) model application.
 
 - Segmentation ([Convolutional Neural Network]('utils.py')):
 
@@ -40,10 +40,14 @@ This is a multi(3) model application.
 
 - **!!Important!! Further reading**
 
+  **Future additions**
+
   - [CycleGAN (Medium)](https://medium.com/@chilldenaya/cyclegan-introduction-pytorch-implementation-5b53913741ca)
 
   - [Convolutional Pose Machines (PDF)](https://arxiv.org/pdf/1602.00134)
   - [CycleGAN.ipynb (Google colab)](https://colab.research.google.com/drive/1BuI-9P1-ku00Nc1tPbBhoeL006-3tNUS?usp=sharing)
+
+  **Future additions**
 
 ## training data
 
@@ -115,10 +119,6 @@ conda env create -f env.yml -y
 conda activate project_3
 conda clean --all --yes
 ```
-
-### Developer Notes:
-
-Project development data: [Zander](https://www.maggiesottero.com/sottero-and-midgley/zander/11869)
 
 ### Research:
 

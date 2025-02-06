@@ -1,25 +1,8 @@
 # Define the base directory and publish folder
 [build]
-base = "ui/dist"
+base = "ui"
 command = "npm run build"
 publish = "dist"
 
-# Headers
-[[headers]]
-for = "/*"
-
-[headers.values]
-Content-Security-Policy = "frame-ancestors 'none'"
-X-Frame-Options = "DENY"
-
-# Environment-specific settings
 [context.production]
-command = "npm run build:prod"
-environment = {NODE_ENV = "production"}
-
-[context.deploy-preview]
-command = "npm run build:main"
-environment = {NODE_ENV = "main"}
-
-[context.dev]
-command = "npm run dev"
+command = "npm run build"

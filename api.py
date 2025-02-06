@@ -1,12 +1,13 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.responses import FileResponse
-import numpy as np
-import cv2
-import io
-from PIL import Image
-import tempfile
-import os
+from fastapi.responses import StreamingResponse
 from pathlib import Path
+from PIL import Image
+import numpy as np
+import tempfile
+import torch
+import cv2
+import os
+import io
 
 from try_on import (
     create_body_mask,
@@ -22,6 +23,10 @@ app = FastAPI(title="Virtual Try-On API")
 # Initialize models
 pose_detector = PoseDetector(model_path="models/graph_opt.pb")
 gmm_model = load_gmm("models/gmm_final.pth")
+
+# Move GMM model to GPU (H100)
+device = "cuda" if torch.cuda.is_available() else "cpu"
+gmm_model = gmm_model.to(device)
 
 # Create output directory if it doesn't exist
 output_dir = Path("output")
@@ -41,6 +46,20 @@ def process_uploaded_image(file: UploadFile) -> np.ndarray:
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     return img
+
+
+@app.get("/")
+async def root():
+    """Root endpoint that returns API information."""
+    return {
+        "name": "Virtual Try-On API",
+        "version": "1.0.0",
+        "description": "API for trying on clothing items on person images",
+        "endpoints": {
+            "/try-on": "POST - Try on a clothing item",
+            "/": "GET - This information",
+        },
+    }
 
 
 @app.post("/try-on/")
@@ -116,14 +135,16 @@ async def try_on(
             # Convert to BGR for saving
             result_bgr = cv2.cvtColor(result.astype(np.uint8), cv2.COLOR_RGB2BGR)
 
-            # Save result to a temporary file
-            with tempfile.NamedTemporaryFile(
-                delete=False, suffix=".png", dir=output_dir
-            ) as tmp:
-                cv2.imwrite(tmp.name, result_bgr)
-                return FileResponse(
-                    tmp.name, media_type="image/png", filename="try_on_result.png"
-                )
+            # Encode the image and stream it
+            _, buffer = cv2.imencode(".png", result_bgr)
+            stream = io.BytesIO(buffer)
+            return StreamingResponse(
+                stream,
+                media_type="image/png",
+                headers={
+                    "Content-Disposition": "attachment; filename=try_on_result.png"
+                },
+            )
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -132,17 +153,3 @@ async def try_on(
         # Close the uploaded files
         person_image.file.close()
         clothing_image.file.close()
-
-
-@app.get("/")
-async def root():
-    """Root endpoint that returns API information."""
-    return {
-        "name": "Virtual Try-On API",
-        "version": "1.0.0",
-        "description": "API for trying on clothing items on person images",
-        "endpoints": {
-            "/try-on": "POST - Try on a clothing item",
-            "/": "GET - This information",
-        },
-    }

@@ -1,8 +1,0 @@
-# Define the base directory and publish folder
-[build]
-base = "ui/"
-command = "npm run build"
-publish = "ui/dist"
-
-[context.production]
-command = "npm run build"

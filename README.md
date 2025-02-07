@@ -22,7 +22,7 @@ When a user uploads an image it will will be segmented by the model in parallel 
 
 [Miniconda MacOSX arm64](https://pytorch.org/get-started/locally/#mac-anaconda)
 
-## model selection
+## Model Selection
 
 This is a multi(4) model application.
 
@@ -45,16 +45,14 @@ This is a multi(4) model application.
 
 - **!!Important!! Further reading**
 
-  **Future additions**
+  **Future Additions**
 
   - [CycleGAN (Medium)](https://medium.com/@chilldenaya/cyclegan-introduction-pytorch-implementation-5b53913741ca)
 
   - [Convolutional Pose Machines (PDF)](https://arxiv.org/pdf/1602.00134)
   - [CycleGAN.ipynb (Google colab)](https://colab.research.google.com/drive/1BuI-9P1-ku00Nc1tPbBhoeL006-3tNUS?usp=sharing)
 
-  **Future additions**
-
-## training data
+## Training Data
 
 - [SA-1B](https://ai.meta.com/datasets/segment-anything-downloads/)
   - A Meta AI dataset with 11M images and 1.1B mask annotations.
@@ -63,7 +61,7 @@ This is a multi(4) model application.
 
 To bring brides just a little something extra. Let them see themselves in that perfect dress on that perfect day.
 
-## Why this approach
+## Why this Approach
 
 - Agnostic Segmentation: The app is not tied to specific brands or clothing styles, making it universally adaptable for any product line.
 
@@ -157,11 +155,57 @@ ng serve
 
 ## Remote Deployment
 
-This app will be entirely deployed from a DigitalOcean GPU droplet
+This app will be entirely deployed from a DigitalOcean GPU droplet.
 
 ## Continuous Integration/Continuous Deployment
 
 None at the moment. Future plans include automation for CI/CD.
+
+### 📈 Future Development  
+
+The **Virtual Try-On App** has several planned enhancements aimed at improving user experience, enhancing realism, and expanding functionality.  
+
+#### 🔹 360-Degree Video Uploads  
+- Users can upload **360-degree videos** to get a full view of the outfit.  
+
+#### 🔹 Adjust Sizes / Try on Real Sizes  
+- Allow users to enter their **measurements** for precise gown fitting and realistic size adjustments.  
+
+#### 🔹 Sustainability Insights  
+- Highlight **eco-friendly gown options** or outfits made from sustainable materials.  
+
+#### 🔹 Hair & Makeup Customization  
+- Provide options for **hairstyles, hair colors, and makeup try-ons** to complete the look.  
+
+#### 🔹 Body Shape Customization  
+- Add a feature to adjust the **user’s digital body representation** to match specific body shapes or sizes.  
+
+#### 🔹 Gown Filtering & Recommendations  
+- Introduce **AI-driven recommendations** based on uploaded user photos and preferences (e.g., body shape, color preferences).  
+
+#### 🔹 Fabric & Motion Simulation  
+- Enhance gown visualization with **fabric flow and motion effects** for a more realistic experience.  
+
+#### 🔹 Retail Integration  
+- Collaborate with **bridal and fashion retailers** to include their inventory directly within the app.  
+
+#### 🔹 Accessories & Shoes  
+- Enable users to **mix and match** shoes, jewelry, and other accessories to complete their virtual try-on experience.  
+
+#### 🔹 Virtual Backgrounds  
+- Allow users to **select virtual backgrounds** to see the gown in different settings.  
+
+#### 🔹 Virtual Mirror Functionality  
+- Mimic an **in-store fitting room** with a real-time, interactive experience.  
+
+#### 🔹 Inclusivity Features  
+- Support users with **diverse physical needs** (e.g., wheelchair poses) to create a fully inclusive experience.  
+
+#### 🔹 Real-Time Feedback from Friends & Family  
+- Include a **"share" feature** so users can get feedback on try-ons via social media or private links.  
+
+These future developments will make the **Virtual Try-On App** more accurate, interactive, and accessible, ensuring a seamless digital shopping experience for all users.  
+
 
 ### Research:
 

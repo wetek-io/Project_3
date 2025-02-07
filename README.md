@@ -22,7 +22,7 @@ The **Virtual Try-On App** is designed to **transform the shopping experience** 
 
 # Model Pipeline
 
-Image ML for virtual Gown try on.
+Image ML for virtual gown try on.
 
 **From A High Level**
 
@@ -60,7 +60,7 @@ This is a multi-model application.
 ### Why Angular 18?
 The front end of the **Virtual Try-On App** is built using **Angular 18**, chosen specifically for its efficiency, scalability, and ease of use for the client. This framework ensures a **loosely coupled** architecture, keeping the UI lightweight while relying on the API for processing.
 
-### 🔹 Key Benefits of Angular 18
+### Key Benefits of Angular 18
 - **Client Simplicity** – The client, **Maggie Sottero**, only needs to supply existing **image links** without additional processing.
 - **Efficient Data Flow** – The **reference image URL** (product image) and **user-uploaded image** are sent **unchanged** directly to the API, maintaining a clean and structured data pipeline.
 - **Scalability & Maintainability** – Angular’s component-based architecture allows for easy scaling and future enhancements.
@@ -70,14 +70,36 @@ The front end of the **Virtual Try-On App** is built using **Angular 18**, chose
   **Future Additions**
 
   - [CycleGAN (Medium)](https://medium.com/@chilldenaya/cyclegan-introduction-pytorch-implementation-5b53913741ca)
-
   - [Convolutional Pose Machines (PDF)](https://arxiv.org/pdf/1602.00134)
   - [CycleGAN.ipynb (Google colab)](https://colab.research.google.com/drive/1BuI-9P1-ku00Nc1tPbBhoeL006-3tNUS?usp=sharing)
+ 
+# Data Collection, Cleanup & Exploration
 
-## Training Data
+## Data Collection
+- **[SA-1B](https://ai.meta.com/datasets/segment-anything-downloads/) Dataset (Meta AI)**
+  - A Meta AI dataset with 11M images and 1.1B mask annotations
+- Additional fashion datasets for model fine-tuning
+- Collected images and corresponding masks (grayscale masks for segmentation)
 
-- [SA-1B](https://ai.meta.com/datasets/segment-anything-downloads/)
-  - A Meta AI dataset with 11M images and 1.1B mask annotations.
+## Data Cleanup & Preprocessing
+- Resized images and masks to a fixed size (e.g., 250x250)
+- Converted images and masks to **PyTorch** tensors for deep learning models
+- Removed noise and ensured data consistency across samples
+
+## Exploration & Workflow
+- **Segmentation Model Development** – Built a segmentation model with two output channels
+- **Pose Detection** – Integrated **OpenPose** to capture key points for garment alignment
+- **Training Process** – Loaded data using **Torch DataLoader**, applied **CrossEntropyLoss**, and monitored epoch loss changes
+- **Model Evaluation** – Used **IoU** (Intersection over Union) to assess accuracy
+
+## Training & Evaluation
+- Loaded data with **Torch DataLoader**, applied **CrossEntropyLoss**, and monitored loss
+- Evaluated using **IoU** (Intersection over Union), which measures segmentation accuracy
+- **IoU** is a metric that evaluates segmentation accuracy by comparing the overlap between the predicted mask and the actual mask
+- **Higher IoU** values indicate better segmentation quality; a value close to 1 suggests near-perfect segmentation
+- **Results**: Achieved **98-99% IoU**, ensuring highly accurate segmentation & garment overlay
+
+---
 
 ## Purpose
 

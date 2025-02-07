@@ -1,11 +1,6 @@
 <!-- Landing page -->
 
 <div class="ui-container">
-  <section class="image-generation-container">
-    <button (click)="generateImage()" class="image-generator">
-      <span>Let see the bride!</span>
-    </button>
-  </section>
   <img id="processedImage" alt="Processed Output" />
   <h1>Go ahead. Try it on.</h1>
   <br />
@@ -13,7 +8,7 @@
   <br />
 
   <section class="image-selection-container">
-    <div class="reference-images">
+    <div class="reference-images" *ngIf="!hasSelectedImage">
       <div class="image-slider">
         <div
           *ngFor="let image of reference_images; index as i"
@@ -29,7 +24,10 @@
       </div>
     </div>
 
-    <div class="image-upload-container" *ngIf="hasSelectedImage">
+    <div
+      class="image-upload-container"
+      *ngIf="hasSelectedImage && !hasUploadedImage"
+    >
       <h3>Upload a selfie.</h3>
       <p>
         For best results make sure to use an image with a simple pose, avoid
@@ -56,7 +54,15 @@
     </div>
   </section>
   <br />
-
+  <section class="image-generation-container" *ngIf="hasFinishedSelections">
+    <button (click)="generateImage()" class="image-generator">
+      <span>Let see the bride!</span>
+    </button>
+    <div>
+      <h2>Processed Output</h2>
+      <img id="processedImage" alt="Processed Image" />
+    </div>
+  </section>
   <br />
 </div>
 

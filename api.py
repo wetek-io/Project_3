@@ -1,6 +1,7 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import Response
 from fastapi import HTTPException
 from pathlib import Path
 import matplotlib as plt
@@ -284,6 +285,7 @@ async def try_on(user_image: UploadFile = File(...), reference_image: str = Form
 
             # Blend images
             blended_img = cv2.addWeighted(user_img, 0.7, warped_ref_resized, 0.3, 0)
+            _, buffer = cv2.imencode(".jpg", blended_img)
 
             # Save the blended image
             blended_image_path = output_dir / "blended_result.jpg"
@@ -293,10 +295,7 @@ async def try_on(user_image: UploadFile = File(...), reference_image: str = Form
 
             print("=== Completed try-on request successfully ===\n")
             # Encode result
-            return {
-                "status": "success",
-                "blended_image_url": f"http://127.0.0.1:8000/static/blended_result.jpg",
-            }
+            return Response(buffer.tobytes(), media_type="image/jpeg")
         except Exception as e:
             print(f"Error in final image processing: {str(e)}")
             raise HTTPException(

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient, provideHttpClient, withFetch } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
@@ -16,6 +16,7 @@ export class AppComponent {
   hasSelectedImage: boolean = false;
   hasUploadedImage: boolean = false;
   hasFinishedSelections: boolean = false;
+  hasGeneratedImage: boolean = false;
   selectedImage: string = '';
   uploadedImage: string | ArrayBuffer | null = null;
 
@@ -44,6 +45,7 @@ export class AppComponent {
     if (file) {
       this.hasFinishedSelections = true;
       const reader = new FileReader();
+      this.hasUploadedImage = !this.hasUploadedImage;
       reader.onload = () => {
         this.uploadedImage = reader.result;
       };
@@ -52,7 +54,6 @@ export class AppComponent {
   }
 
   generateImage() {
-    const api = 'http://127.0.0.1:8000/try-on';
     const formData = new FormData();
 
     formData.append('reference_image', this.selectedImage); // Pass URL directly
@@ -69,25 +70,21 @@ export class AppComponent {
         next: (response: Blob) => {
           // Create an object URL for the binary image
           const imageUrl = URL.createObjectURL(response);
+
           const processedImageElement = document.getElementById(
             'processedImage'
           ) as HTMLImageElement;
           if (processedImageElement) {
+            this.hasGeneratedImage = !this.hasGeneratedImage;
             processedImageElement.src = imageUrl; // Set the image URL
+            console.log(response);
+            console.log(imageUrl);
           }
         },
         error: (error) => {
           console.error('Error generating image:', error);
         },
       });
-  }
-
-  // Display the processed image
-  displayProcessedImage(imageUrl: string) {
-    const imgElement = document.getElementById(
-      'processedImage'
-    ) as HTMLImageElement;
-    imgElement.src = imageUrl;
   }
 
   // Helper function to convert base64 to Blob

@@ -29,10 +29,10 @@ This is a multi(4) model application.
 - Segmentation ([Convolutional Neural Network]('utils.py')):
 
   - [Image-to-Image G]
-  - A CNN is especially adept at edge detection such as the edge of a dress of body part.
-  - This project uses a model based on the pytorch tutorial model. This is a good starting
+  - A CNN is especially adept at edge detection such as the edge of a dress or body part.
+  - This project uses a model based on the PyTorch tutorial model. This is a good starting
     point for a custom CNN build. This model is currently only taking one input and applying
-    softmax with a dimension of one
+    Sigmoid.
 
 - Pose Evaluation (OpenPose):
 
@@ -115,7 +115,7 @@ Example Flow Visualization 1.
   - Upload:
     - This section is hidden until the user has selected a reference_image
     - They can either drag-and-drop or click to upload.
-    - Users user_image is displayed under the the upload CTA
+    - Users user_image is displayed under the upload CTA
   - Image Generation
     - both reference_image and user_image are sent to the backend models via the fastapi endpoint
       - AI machine stuff magic
@@ -159,9 +159,9 @@ ng serve
 
 This app will be entirely deployed from a DigitalOcean GPU droplet
 
-## CI/CD
+## Continuous Integration/Continuous Deployment
 
-None at the moment. Future plans include automation for CI/CD
+None at the moment. Future plans include automation for CI/CD.
 
 ### Research:
 
@@ -225,7 +225,7 @@ Tasks:
 - Align gowns to shoulders, hips, and legs based on pose keypoints.
 - Add minimal scaling to adjust for body size variations.
 - Deliverable: A functional overlay module for at least 2–3 sample gowns.
-- Time Allocation: 6 days.
+- Time Allocation: 12 days.
 
 ## Frontend Developer (Steven):
 

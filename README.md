@@ -134,14 +134,14 @@ To bring brides just a little something extra. Let them see themselves in that p
   - monitor for epoch loss changes
 - Evaluation
   - Switch to evaluation mode (model.eval())
-  - Generate prediction on model's validation/test data
+  - Generate prediction on the model's validation/test data
   - Visualize the prediction masks against the truth masks
 - Inference
   - Save training model
   - Load the model for inference on new image
   - Generate and visualize segmentation masks of the user's image and the product's images
 - Visualization and debugging
-  - Visualization is handled by matplotlib or saved as images
+  - Visualization is handled by Matplotlib or saved as images
 
 ## User Experience
 
@@ -151,19 +151,19 @@ Example Flow Visualization 1.
   - Title:
     - “Go ahead. Try it on.”
   - Image Slider:
-    - These are client product image i.e. Maggie Sottero wedding dress
+    - These are client product images (i.e. Maggie Sottero wedding dress)
     - reference_image
-    - User interacts with slider until to select a reference_image
+    - User interacts with slider to select a reference_image
   - Upload:
     - This section is hidden until the user has selected a reference_image
     - They can either drag-and-drop or click to upload.
-    - Users user_image is displayed under the upload CTA
+    - User's user_image is displayed under the upload CTA
   - Image Generation
-    - both reference_image and user_image are sent to the backend models via the fastapi endpoint
+    - Both reference_image and user_image are sent to the backend models via the FastAPI endpoint
       - AI machine stuff magic
   - Display Results:
     - Spinner with “Processing…” message.
-    - Display image of bride in dress.
+    - Displays an image of the bride in the selected dress.
   - Next Steps:
     - Option to download or share.
     - “Upload Another” or “Try Advanced Tools. (Future)”
@@ -183,14 +183,14 @@ conda clean --all --yes
 
 To run locally you will need to manually start both the fastapi server and the angular server.
 
-fastapi:
+[FastApi](https://fastapi.tiangolo.com/):
 
 ```bash
 conda activate project_3 # if applicable
-fastapi dev api.py
+FastaApi dev api.py
 ```
 
-angular(ui):
+[Angular 18](https://v18.angular.dev/):
 
 ```bash
 cd ui
@@ -253,7 +253,7 @@ These future developments will make the **Virtual Try-On App** more accurate, in
 
 ### Research:
 
-- [virtual-gown-tryon (A previous personal project)](https://github.com/steven-midgley/virtual-gown-tryon)
+- [Virtual-gown-tryon (A previous personal project)](https://github.com/steven-midgley/virtual-gown-tryon)
 
 - [DeepLabv3+](https://github.com/tensorflow/models/tree/master/research/deeplab)
 

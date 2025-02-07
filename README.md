@@ -18,7 +18,7 @@ The **Virtual Try-On App** addresses these challenges by providing a seamless, i
 - **Enhances online shopping conversion rates** by reducing uncertainty and improving engagement.  
 - **Saves time and effort**, making bridal shopping more enjoyable and efficient.  
 
-The **Virtual Try-On App** is designed to **transform the shopping experience** by bridging the gap between digital browsing and real-world confidence. 🚀  
+The **Virtual Try-On App** is designed to **transform the shopping experience** by bridging the gap between digital browsing and real-world confidence. 
 
 # Notes for Keri: Steven
 

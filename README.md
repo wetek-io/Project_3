@@ -1,10 +1,28 @@
-# Project_3
+# Project 3 Overview - Transforming Bridal and Apparel Shopping with AI
+
+### Business Problem  
+
+Bridal shopping is often **stressful, time-consuming, and logistically challenging**. Brides may not have access to a **wide range of dresses** in physical stores, and trying on multiple gowns can be exhausting. This limits their ability to make confident purchasing decisions, especially in an era where online shopping is increasingly preferred.  
+
+### Solution  
+
+The **Virtual Try-On App** addresses these challenges by providing a seamless, interactive shopping experience. The app is:  
+
+1. **Site Agnostic** – Works with images from any website or store, allowing broad compatibility.  
+2. **Product Agnostic** – Enables users to try on any outfit (gowns, casual wear, etc.) by uploading a digital image of the product and themselves.  
+3. **Convenient** – Delivers a **personalized** shopping experience with instant visualizations, eliminating the need for physical store visits.  
+
+### Impact  
+
+- **Empowers customers** to visualize how they’ll look in various outfits, increasing confidence in their purchase decisions.  
+- **Enhances online shopping conversion rates** by reducing uncertainty and improving engagement.  
+- **Saves time and effort**, making bridal shopping more enjoyable and efficient.  
+
+The **Virtual Try-On App** is designed to **transform the shopping experience** by bridging the gap between digital browsing and real-world confidence. 🚀  
 
 # Notes for Keri: Steven
 
-This app is using Angular18 for the front end. I chose this specifically for the easy of
-client. This allows a client, Maggie Sottero, to only need to supply what they already have, the image link. The reference_image url and the user's uploaded image are sent unchanged to
-the api endpoint directly. The front end only sends and receives data, keeping it loosely coupled from the API and back-end, ensuring scalability.
+This app is using Angular18 for the front end. I chose this specifically for the ease of the client. This allows a client, Maggie Sottero, to only need to supply what they already have, the image link. The reference_image URL and the user's uploaded image are sent unchanged to the API endpoint directly. The front end only sends and receives data, keeping it loosely coupled from the API and back-end, ensuring scalability.
 
 # Model Pipeline
 
@@ -12,7 +30,7 @@ Image ML for virtual Gown try on.
 
 **From A High Level**
 
-This app is meant to allow brides to try on gown virtually while visiting our website. This project uses a custom UNet model which will be trained on the Meta AI segmentation dataset SA-1B.
+This app is meant to allow brides to try on gowns virtually while visiting our website. This project uses a custom UNet model which will be trained on the Meta AI segmentation dataset SA-1B.
 
 The model needs to be pre-trained for the app.
 

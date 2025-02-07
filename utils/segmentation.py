@@ -1,12 +1,13 @@
+import torchvision.transforms as transforms
 import torch
 import torch.nn as nn
-import torchvision.transforms as transforms
 from PIL import Image
 import numpy as np
 import cv2
 from pathlib import Path
 import logging
 from utils.unet import UNet
+import matplotlib as plt
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -70,7 +71,6 @@ class Segmenter:
             image_np = np.array(image)
             if len(image_np.shape) == 3 and image_np.shape[2] == 3:
                 image_np = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
-
             cv2.imwrite(str(debug_dir / "original.jpg"), image_np)
             cv2.imwrite(str(debug_dir / "segmentation_mask.jpg"), mask)
 

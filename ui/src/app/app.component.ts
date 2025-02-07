@@ -52,7 +52,7 @@ export class AppComponent {
   }
 
   generateImage() {
-    const api = 'http://127.0.0.1:8000/try-on/';
+    const api = 'http://127.0.0.1:8000/try-on';
     const formData = new FormData();
 
     formData.append('reference_image', this.selectedImage); // Pass URL directly
@@ -61,10 +61,25 @@ export class AppComponent {
       formData.append('user_image', userBlob, 'user_image.jpg');
     }
 
-    this.http.post(api, formData).subscribe({
-      next: (response) => console.log('API Response:', response),
-      error: (err) => console.error('Error:', err),
-    });
+    this.http
+      .post('http://127.0.0.1:8000/try-on', formData, {
+        responseType: 'blob', // Specify response type as blob
+      })
+      .subscribe({
+        next: (response: Blob) => {
+          // Create an object URL for the binary image
+          const imageUrl = URL.createObjectURL(response);
+          const processedImageElement = document.getElementById(
+            'processedImage'
+          ) as HTMLImageElement;
+          if (processedImageElement) {
+            processedImageElement.src = imageUrl; // Set the image URL
+          }
+        },
+        error: (error) => {
+          console.error('Error generating image:', error);
+        },
+      });
   }
 
   // Display the processed image

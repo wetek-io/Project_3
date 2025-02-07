@@ -258,10 +258,10 @@ def prepare_person_representation(
     Returns:
         Tensor of shape (1, 7, height, width)
     """
-    # Create heatmap from pose points
-    heatmap = pose_points_to_heatmap(
-        pose_points, torso_mask.shape[0], torso_mask.shape[1]
-    )
+    # # Create heatmap from pose points
+    # heatmap = pose_points_to_heatmap(
+    #     pose_points, torso_mask.shape[0], torso_mask.shape[1]
+    # )
 
     # Ensure input image is normalized to [0, 1]
     rgb_image = rgb_image.astype(np.float32) / 255.0
@@ -271,13 +271,12 @@ def prepare_person_representation(
     face_hair_mask = cv2.resize(
         face_hair_mask, (rgb_image.shape[1], rgb_image.shape[0])
     )
-    heatmap = cv2.resize(heatmap, (rgb_image.shape[1], rgb_image.shape[0]))
 
     # Stack inputs to form a 7-channel representation
     person_repr = np.concatenate(
         [
             rgb_image,  # 3 channels (RGB)
-            heatmap,  # 3 channels (pose heatmap)
+            pose_points,  # 3 channels (pose heatmap)
             torso_mask[..., np.newaxis],  # 1 channel (torso mask)
         ],
         axis=2,

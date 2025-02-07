@@ -1,8 +1,9 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi import HTTPException
 from pathlib import Path
+import matplotlib as plt
 import numpy as np
 import requests
 import torch
@@ -21,15 +22,12 @@ from utils.gmm import load_gmm, tps_transform
 # Initiate app
 app = FastAPI(title="Virtual Try-On API")
 
-# Handle CORS
-origins = [
-    "http://localhost:4200",  # Angular dev server
-    "http://127.0.0.1:4200",
-]
+app.mount("/static", StaticFiles(directory="output"), name="static")
 
+# Handle CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins="http://localhost:4200",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -72,7 +70,6 @@ async def root():
         "name": "Virtual Try-On API",
         "version": "1.0.0",
         "description": "API for trying on clothing items on person images",
-        "redirects": {},
         "endpoints": {
             "/try-on": "POST - Try on a clothing item",
             "/": "GET - This information",
@@ -287,21 +284,19 @@ async def try_on(user_image: UploadFile = File(...), reference_image: str = Form
 
             # Blend images
             blended_img = cv2.addWeighted(user_img, 0.7, warped_ref_resized, 0.3, 0)
+
+            # Save the blended image
+            blended_image_path = output_dir / "blended_result.jpg"
+            cv2.imwrite(str(blended_image_path), blended_img)
+
             print("Successfully blended images")
 
-            # Encode result
-            print("Encoding final result...")
-            _, buffer = cv2.imencode(".jpg", blended_img)
-            stream = io.BytesIO(buffer)
-
             print("=== Completed try-on request successfully ===\n")
-            return StreamingResponse(
-                stream,
-                media_type="image/jpg",
-                headers={
-                    "Content-Disposition": "attachment; filename=blended_result.jpg"
-                },
-            )
+            # Encode result
+            return {
+                "status": "success",
+                "blended_image_url": f"http://127.0.0.1:8000/static/blended_result.jpg",
+            }
         except Exception as e:
             print(f"Error in final image processing: {str(e)}")
             raise HTTPException(

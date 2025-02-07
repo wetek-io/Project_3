@@ -20,10 +20,6 @@ The **Virtual Try-On App** addresses these challenges by providing a seamless, i
 
 The **Virtual Try-On App** is designed to **transform the shopping experience** by bridging the gap between digital browsing and real-world confidence. 
 
-# Notes for Keri: Steven
-
-This app is using Angular18 for the front end. I chose this specifically for the ease of the client. This allows a client, Maggie Sottero, to only need to supply what they already have, the image link. The reference_image URL and the user's uploaded image are sent unchanged to the API endpoint directly. The front end only sends and receives data, keeping it loosely coupled from the API and back-end, ensuring scalability.
-
 # Model Pipeline
 
 Image ML for virtual Gown try on.
@@ -38,30 +34,38 @@ When a user uploads an image it will will be segmented by the model in parallel 
 
 ## Environment
 
-[Miniconda MacOSX arm64](https://pytorch.org/get-started/locally/#mac-anaconda)
+[Anaconda](https://www.anaconda.com/)
 
 ## Model Selection
 
-This is a multi(4) model application.
+This is a multi-model application.
 
 - Segmentation ([Convolutional Neural Network]('utils.py')):
 
-  - [Image-to-Image G]
-  - A CNN is especially adept at edge detection such as the edge of a dress or body part.
-  - This project uses a model based on the PyTorch tutorial model. This is a good starting
-    point for a custom CNN build. This model is currently only taking one input and applying
-    Sigmoid.
+  - This model utilizes two inputs and applies Sigmoid.
 
 - Pose Evaluation (OpenPose):
 
   - [OpenPoses (A collection of poses for OpenPose)](https://openposes.com/)
   - For detecting the shoulders, hips, and bust anchor points
 
+- Segmentation ([Convolutional Neural Network]('utils.py')):
+  
+  - This model utilizes two inputs and applies Softmax.
+ 
 - Image Generation (CycleGAN):
 
-  - Generate image of bride wearing gown
+  - Generate image of bride wearing the selected gown.
+ 
+### Why Angular 18?
+The front end of the **Virtual Try-On App** is built using **Angular 18**, chosen specifically for its efficiency, scalability, and ease of use for the client. This framework ensures a **loosely coupled** architecture, keeping the UI lightweight while relying on the API for processing.
 
-- **!!Important!! Further reading**
+### 🔹 Key Benefits of Angular 18
+- **Client Simplicity** – The client, **Maggie Sottero**, only needs to supply existing **image links** without additional processing.
+- **Efficient Data Flow** – The **reference image URL** (product image) and **user-uploaded image** are sent **unchanged** directly to the API, maintaining a clean and structured data pipeline.
+- **Scalability & Maintainability** – Angular’s component-based architecture allows for easy scaling and future enhancements.
+- **Optimized Performance** – Angular 18 leverages Ivy rendering and improved reactivity, ensuring a **smooth** and **fast user experience**.
+- **Strict TypeScript Support** – Ensures robust type safety and fewer runtime errors.
 
   **Future Additions**
 
@@ -229,16 +233,13 @@ These future developments will make the **Virtual Try-On App** more accurate, in
 
 - [virtual-gown-tryon (A previous personal project)](https://github.com/steven-midgley/virtual-gown-tryon)
 
-- [LIP(Look Into Person)](https://www.sysu-hcp.net/lip/index.php) - A large scale dataset for the sematic understanding of person
-
 - [DeepLabv3+](https://github.com/tensorflow/models/tree/master/research/deeplab)
 
 - [U-Net](https://github.com/milesial/Pytorch-UNet)
 
   - [U-Net White paper](https://arxiv.org/pdf/1505.04597v1)
   - [The U-Net: A complete guide (Medium)](https://medium.com/@alejandro.itoaramendia/decoding-the-u-net-a-complete-guide-810b1c6d56d8#https://medium.com/@alejandro.itoaramendia/convolutional-neural-networks-cnns-a-complete-guide-a803534a1930)
-  - [tensorflow segment anything](https://github.com/tensorflow/datasets/blob/master/docs/catalog/segment_anything.md)
-
+    
 - [Convolutional Image Segmentation](https://arxiv.org/pdf/1706.05587v3)
 
 ## Focus Areas for the 2 Week Timeline:

@@ -55,7 +55,7 @@ This is a multi-model application.
  
 - Image Generation (CycleGAN):
 
-  - Generate image of bride wearing the selected gown.
+  - Generates image of bride wearing the selected gown.
  
 ### Why Angular 18?
 The front end of the **Virtual Try-On App** is built using **Angular 18**, chosen specifically for its efficiency, scalability, and ease of use for the client. This framework ensures a **loosely coupled** architecture, keeping the UI lightweight while relying on the API for processing.
@@ -167,6 +167,8 @@ Example Flow Visualization 1.
   - Next Steps:
     - Option to download or share.
     - “Upload Another” or “Try Advanced Tools. (Future)”
+   
+      ![image](https://github.com/user-attachments/assets/8af2b9d4-f381-400e-9b82-24067d4841f7)
 
 ## Env Reset
 
@@ -204,6 +206,9 @@ This app will be entirely deployed from a DigitalOcean GPU droplet.
 ## Continuous Integration/Continuous Deployment
 
 None at the moment. Future plans include automation for CI/CD.
+
+### Initial Pilot Project Presentation
+[Canva Pilot Project Presentation](https://www.canva.com/design/DAGdgTG2_Wg/jtJtqYKdtLnXsE7zQHx7rA/view?utm_content=DAGdgTG2_Wg&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h3a23ecb100)
 
 ### 📈 Future Development  
 

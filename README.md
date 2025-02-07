@@ -187,43 +187,43 @@ None at the moment. Future plans include automation for CI/CD.
 
 The **Virtual Try-On App** has several planned enhancements aimed at improving user experience, enhancing realism, and expanding functionality.  
 
-#### 🔹 360-Degree Video Uploads  
+#### 360-Degree Video Uploads  
 - Users can upload **360-degree videos** to get a full view of the outfit.  
 
-#### 🔹 Adjust Sizes / Try on Real Sizes  
+#### Adjust Sizes / Try on Real Sizes  
 - Allow users to enter their **measurements** for precise gown fitting and realistic size adjustments.  
 
-#### 🔹 Sustainability Insights  
+#### Sustainability Insights  
 - Highlight **eco-friendly gown options** or outfits made from sustainable materials.  
 
-#### 🔹 Hair & Makeup Customization  
+#### Hair & Makeup Customization  
 - Provide options for **hairstyles, hair colors, and makeup try-ons** to complete the look.  
 
-#### 🔹 Body Shape Customization  
+#### Body Shape Customization  
 - Add a feature to adjust the **user’s digital body representation** to match specific body shapes or sizes.  
 
-#### 🔹 Gown Filtering & Recommendations  
+#### Gown Filtering & Recommendations  
 - Introduce **AI-driven recommendations** based on uploaded user photos and preferences (e.g., body shape, color preferences).  
 
-#### 🔹 Fabric & Motion Simulation  
+#### Fabric & Motion Simulation  
 - Enhance gown visualization with **fabric flow and motion effects** for a more realistic experience.  
 
-#### 🔹 Retail Integration  
+#### Retail Integration  
 - Collaborate with **bridal and fashion retailers** to include their inventory directly within the app.  
 
-#### 🔹 Accessories & Shoes  
+#### Accessories & Shoes  
 - Enable users to **mix and match** shoes, jewelry, and other accessories to complete their virtual try-on experience.  
 
-#### 🔹 Virtual Backgrounds  
+#### Virtual Backgrounds  
 - Allow users to **select virtual backgrounds** to see the gown in different settings.  
 
-#### 🔹 Virtual Mirror Functionality  
+#### Virtual Mirror Functionality  
 - Mimic an **in-store fitting room** with a real-time, interactive experience.  
 
-#### 🔹 Inclusivity Features  
+#### Inclusivity Features  
 - Support users with **diverse physical needs** (e.g., wheelchair poses) to create a fully inclusive experience.  
 
-#### 🔹 Real-Time Feedback from Friends & Family  
+#### Real-Time Feedback from Friends & Family  
 - Include a **"share" feature** so users can get feedback on try-ons via social media or private links.  
 
 These future developments will make the **Virtual Try-On App** more accurate, interactive, and accessible, ensuring a seamless digital shopping experience for all users.  

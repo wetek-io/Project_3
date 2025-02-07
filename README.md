@@ -352,3 +352,14 @@ Tasks:
 - Provide feedback for quick fixes and optimizations.
 - Deliverable: A project roadmap, test cases, and a consolidated MVP demo.
 - Time Allocation: Continuous, with focused testing in the last 4 days.
+
+## Project Contributors
+- [Keri Alexander](www.linkedin.com/in/kerialexander)
+- [JD]
+- [Ian Hale](www.linkedin.com/in/ian-h-622b9231b)
+- [Reis Hymer](www.linkedin.com/in/reis-hymer-6655b6321)
+- [Carson Jones](www.linkedin.com/in/carson-jones-614607321)
+- [Steven Midgley](www.linkedin.com/in/steven-midgley-892391208)
+- [Roger Navarro](www.linkedin.com/in/roger-navarro-081314)
+
+

@@ -1,18 +1,32 @@
-# Project_3
+# Project 3 Overview - Transforming Bridal and Apparel Shopping with AI
 
-# Notes for Keri: Steven
+### Business Problem  
 
-This app is using Angular18 for the front end. I chose this specifically for the easy of
-client. This allows a client, Maggie Sottero, to only need to supply what they already have, the image link. The reference_image url and the user's uploaded image are sent unchanged to
-the api endpoint directly. The front end only sends and receives data, keeping it loosely coupled from the API and back-end, ensuring scalability.
+Bridal shopping is often **stressful, time-consuming, and logistically challenging**. Brides may not have access to a **wide range of dresses** in physical stores, and trying on multiple gowns can be exhausting. This limits their ability to make confident purchasing decisions, especially in an era where online shopping is increasingly preferred.  
+
+### Solution  
+
+The **Virtual Try-On App** addresses these challenges by providing a seamless, interactive shopping experience. The app is:  
+
+1. **Site Agnostic** – Works with images from any website or store, allowing broad compatibility.  
+2. **Product Agnostic** – Enables users to try on any outfit (gowns, casual wear, etc.) by uploading a digital image of the product and themselves.  
+3. **Convenient** – Delivers a **personalized** shopping experience with instant visualizations, eliminating the need for physical store visits.  
+
+### Impact  
+
+- **Empowers customers** to visualize how they’ll look in various outfits, increasing confidence in their purchase decisions.  
+- **Enhances online shopping conversion rates** by reducing uncertainty and improving engagement.  
+- **Saves time and effort**, making bridal shopping more enjoyable and efficient.  
+
+The **Virtual Try-On App** is designed to **transform the shopping experience** by bridging the gap between digital browsing and real-world confidence. 
 
 # Model Pipeline
 
-Image ML for virtual Gown try on.
+Image ML for virtual gown try on.
 
 **From A High Level**
 
-This app is meant to allow brides to try on gown virtually while visiting our website. This project uses a custom UNet model which will be trained on the Meta AI segmentation dataset SA-1B.
+This app is meant to allow brides to try on gowns virtually while visiting our website. This project uses a custom UNet model which will be trained on the Meta AI segmentation dataset SA-1B.
 
 The model needs to be pre-trained for the app.
 
@@ -20,50 +34,78 @@ When a user uploads an image it will will be segmented by the model in parallel 
 
 ## Environment
 
-[Miniconda MacOSX arm64](https://pytorch.org/get-started/locally/#mac-anaconda)
+[Anaconda](https://www.anaconda.com/)
 
-## model selection
+## Model Selection
 
-This is a multi(4) model application.
+This is a multi-model application.
 
 - Segmentation ([Convolutional Neural Network]('utils.py')):
 
-  - [Image-to-Image G]
-  - A CNN is especially adept at edge detection such as the edge of a dress of body part.
-  - This project uses a model based on the pytorch tutorial model. This is a good starting
-    point for a custom CNN build. This model is currently only taking one input and applying
-    softmax with a dimension of one
+  - This model utilizes two inputs and applies Sigmoid.
 
 - Pose Evaluation (OpenPose):
 
   - [OpenPoses (A collection of poses for OpenPose)](https://openposes.com/)
   - For detecting the shoulders, hips, and bust anchor points
 
+- Segmentation ([Convolutional Neural Network]('utils.py')):
+  
+  - This model utilizes two inputs and applies Softmax.
+ 
 - Image Generation (CycleGAN):
 
-  - Generate image of bride wearing gown
+  - Generates image of bride wearing the selected gown.
+ 
+### Why Angular 18?
+The front end of the **Virtual Try-On App** is built using **Angular 18**, chosen specifically for its efficiency, scalability, and ease of use for the client. This framework ensures a **loosely coupled** architecture, keeping the UI lightweight while relying on the API for processing.
 
-- **!!Important!! Further reading**
+### Key Benefits of Angular 18
+- **Client Simplicity** – The client, **Maggie Sottero**, only needs to supply existing **image links** without additional processing.
+- **Efficient Data Flow** – The **reference image URL** (product image) and **user-uploaded image** are sent **unchanged** directly to the API, maintaining a clean and structured data pipeline.
+- **Scalability & Maintainability** – Angular’s component-based architecture allows for easy scaling and future enhancements.
+- **Optimized Performance** – Angular 18 leverages Ivy rendering and improved reactivity, ensuring a **smooth** and **fast user experience**.
+- **Strict TypeScript Support** – Ensures robust type safety and fewer runtime errors.
 
-  **Future additions**
+  **Future Additions**
 
   - [CycleGAN (Medium)](https://medium.com/@chilldenaya/cyclegan-introduction-pytorch-implementation-5b53913741ca)
-
   - [Convolutional Pose Machines (PDF)](https://arxiv.org/pdf/1602.00134)
   - [CycleGAN.ipynb (Google colab)](https://colab.research.google.com/drive/1BuI-9P1-ku00Nc1tPbBhoeL006-3tNUS?usp=sharing)
+ 
+# Data Collection, Cleanup & Exploration
 
-  **Future additions**
+## Data Collection
+- **[SA-1B](https://ai.meta.com/datasets/segment-anything-downloads/) Dataset (Meta AI)**
+  - A Meta AI dataset with 11M images and 1.1B mask annotations
+- Additional fashion datasets for model fine-tuning
+- Collected images and corresponding masks (grayscale masks for segmentation)
 
-## training data
+## Data Cleanup & Preprocessing
+- Resized images and masks to a fixed size (e.g., 250x250)
+- Converted images and masks to **PyTorch** tensors for deep learning models
+- Removed noise and ensured data consistency across samples
 
-- [SA-1B](https://ai.meta.com/datasets/segment-anything-downloads/)
-  - A Meta AI dataset with 11M images and 1.1B mask annotations.
+## Exploration & Workflow
+- **Segmentation Model Development** – Built a segmentation model with two output channels
+- **Pose Detection** – Integrated **OpenPose** to capture key points for garment alignment
+- **Training Process** – Loaded data using **Torch DataLoader**, applied **CrossEntropyLoss**, and monitored epoch loss changes
+- **Model Evaluation** – Used **IoU** (Intersection over Union) to assess accuracy
+
+## Training & Evaluation
+- Loaded data with **Torch DataLoader**, applied **CrossEntropyLoss**, and monitored loss
+- Evaluated using **IoU** (Intersection over Union), which measures segmentation accuracy
+- **IoU** is a metric that evaluates segmentation accuracy by comparing the overlap between the predicted mask and the actual mask
+- **Higher IoU** values indicate better segmentation quality; a value close to 1 suggests near-perfect segmentation
+- **Results**: Achieved **98-99% IoU**, ensuring highly accurate segmentation & garment overlay
+
+---
 
 ## Purpose
 
 To bring brides just a little something extra. Let them see themselves in that perfect dress on that perfect day.
 
-## Why this approach
+## Why this Approach
 
 - Agnostic Segmentation: The app is not tied to specific brands or clothing styles, making it universally adaptable for any product line.
 
@@ -92,14 +134,14 @@ To bring brides just a little something extra. Let them see themselves in that p
   - monitor for epoch loss changes
 - Evaluation
   - Switch to evaluation mode (model.eval())
-  - Generate prediction on model's validation/test data
+  - Generate prediction on the model's validation/test data
   - Visualize the prediction masks against the truth masks
 - Inference
   - Save training model
   - Load the model for inference on new image
   - Generate and visualize segmentation masks of the user's image and the product's images
 - Visualization and debugging
-  - Visualization is handled by matplotlib or saved as images
+  - Visualization is handled by Matplotlib or saved as images
 
 ## User Experience
 
@@ -109,22 +151,24 @@ Example Flow Visualization 1.
   - Title:
     - “Go ahead. Try it on.”
   - Image Slider:
-    - These are client product image i.e. Maggie Sottero wedding dress
+    - These are client product images (i.e. Maggie Sottero wedding dress)
     - reference_image
-    - User interacts with slider until to select a reference_image
+    - User interacts with slider to select a reference_image
   - Upload:
     - This section is hidden until the user has selected a reference_image
     - They can either drag-and-drop or click to upload.
-    - Users user_image is displayed under the the upload CTA
+    - User's user_image is displayed under the upload CTA
   - Image Generation
-    - both reference_image and user_image are sent to the backend models via the fastapi endpoint
+    - Both reference_image and user_image are sent to the backend models via the FastAPI endpoint
       - AI machine stuff magic
   - Display Results:
     - Spinner with “Processing…” message.
-    - Display image of bride in dress.
+    - Displays an image of the bride in the selected dress.
   - Next Steps:
     - Option to download or share.
     - “Upload Another” or “Try Advanced Tools. (Future)”
+   
+      ![image](https://github.com/user-attachments/assets/8af2b9d4-f381-400e-9b82-24067d4841f7)
 
 ## Env Reset
 
@@ -141,14 +185,14 @@ conda clean --all --yes
 
 To run locally you will need to manually start both the fastapi server and the angular server.
 
-fastapi:
+[FastApi](https://fastapi.tiangolo.com/):
 
 ```bash
 conda activate project_3 # if applicable
-fastapi dev api.py
+FastaApi dev api.py
 ```
 
-angular(ui):
+[Angular 18](https://v18.angular.dev/):
 
 ```bash
 cd ui
@@ -157,17 +201,64 @@ ng serve
 
 ## Remote Deployment
 
-This app will be entirely deployed from a DigitalOcean GPU droplet
+This app will be entirely deployed from a DigitalOcean GPU droplet.
 
-## CI/CD
+## Continuous Integration/Continuous Deployment
 
-None at the moment. Future plans include automation for CI/CD
+None at the moment. Future plans include automation for CI/CD.
+
+### Initial Pilot Project Presentation
+[Canva Pilot Project Presentation](https://www.canva.com/design/DAGdgTG2_Wg/jtJtqYKdtLnXsE7zQHx7rA/view?utm_content=DAGdgTG2_Wg&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h3a23ecb100)
+
+### 📈 Future Development  
+
+The **Virtual Try-On App** has several planned enhancements aimed at improving user experience, enhancing realism, and expanding functionality.  
+
+#### 360-Degree Video Uploads  
+- Users can upload **360-degree videos** to get a full view of the outfit.  
+
+#### Adjust Sizes / Try on Real Sizes  
+- Allow users to enter their **measurements** for precise gown fitting and realistic size adjustments.  
+
+#### Sustainability Insights  
+- Highlight **eco-friendly gown options** or outfits made from sustainable materials.  
+
+#### Hair & Makeup Customization  
+- Provide options for **hairstyles, hair colors, and makeup try-ons** to complete the look.  
+
+#### Body Shape Customization  
+- Add a feature to adjust the **user’s digital body representation** to match specific body shapes or sizes.  
+
+#### Gown Filtering & Recommendations  
+- Introduce **AI-driven recommendations** based on uploaded user photos and preferences (e.g., body shape, color preferences).  
+
+#### Fabric & Motion Simulation  
+- Enhance gown visualization with **fabric flow and motion effects** for a more realistic experience.  
+
+#### Retail Integration  
+- Collaborate with **bridal and fashion retailers** to include their inventory directly within the app.  
+
+#### Accessories & Shoes  
+- Enable users to **mix and match** shoes, jewelry, and other accessories to complete their virtual try-on experience.  
+
+#### Virtual Backgrounds  
+- Allow users to **select virtual backgrounds** to see the gown in different settings.  
+
+#### Virtual Mirror Functionality  
+- Mimic an **in-store fitting room** with a real-time, interactive experience.  
+
+#### Inclusivity Features  
+- Support users with **diverse physical needs** (e.g., wheelchair poses) to create a fully inclusive experience.  
+
+#### Real-Time Feedback from Friends & Family  
+- Include a **"share" feature** so users can get feedback on try-ons via social media or private links.  
+
+These future developments will make the **Virtual Try-On App** more accurate, interactive, and accessible, ensuring a seamless digital shopping experience for all users.  
+
 
 ### Research:
 
-- [virtual-gown-tryon (A previous personal project)](https://github.com/steven-midgley/virtual-gown-tryon)
-
-- [LIP(Look Into Person)](https://www.sysu-hcp.net/lip/index.php) - A large scale dataset for the sematic understanding of person
+- [Virtual-gown-tryon (A previous personal project)](https://github.com/steven-midgley/virtual-gown-tryon)
 
 - [DeepLabv3+](https://github.com/tensorflow/models/tree/master/research/deeplab)
 
@@ -175,8 +266,7 @@ None at the moment. Future plans include automation for CI/CD
 
   - [U-Net White paper](https://arxiv.org/pdf/1505.04597v1)
   - [The U-Net: A complete guide (Medium)](https://medium.com/@alejandro.itoaramendia/decoding-the-u-net-a-complete-guide-810b1c6d56d8#https://medium.com/@alejandro.itoaramendia/convolutional-neural-networks-cnns-a-complete-guide-a803534a1930)
-  - [tensorflow segment anything](https://github.com/tensorflow/datasets/blob/master/docs/catalog/segment_anything.md)
-
+    
 - [Convolutional Image Segmentation](https://arxiv.org/pdf/1706.05587v3)
 
 ## Focus Areas for the 2 Week Timeline:
@@ -225,7 +315,7 @@ Tasks:
 - Align gowns to shoulders, hips, and legs based on pose keypoints.
 - Add minimal scaling to adjust for body size variations.
 - Deliverable: A functional overlay module for at least 2–3 sample gowns.
-- Time Allocation: 6 days.
+- Time Allocation: 12 days.
 
 ## Frontend Developer (Steven):
 
@@ -262,3 +352,14 @@ Tasks:
 - Provide feedback for quick fixes and optimizations.
 - Deliverable: A project roadmap, test cases, and a consolidated MVP demo.
 - Time Allocation: Continuous, with focused testing in the last 4 days.
+
+## Project Contributors
+- [Keri Alexander](www.linkedin.com/in/kerialexander)
+- [JD]
+- [Ian Hale](www.linkedin.com/in/ian-h-622b9231b)
+- [Reis Hymer](www.linkedin.com/in/reis-hymer-6655b6321)
+- [Carson Jones](www.linkedin.com/in/carson-jones-614607321)
+- [Steven Midgley](www.linkedin.com/in/steven-midgley-892391208)
+- [Roger Navarro](www.linkedin.com/in/roger-navarro-081314)
+
+

@@ -7,7 +7,7 @@ import torch
 import os
 
 # Import U-Net and Dataset
-from utils import UNet, SegmentationDataset
+from utils import unet
 
 # Configuration
 BATCH_SIZE = 128
@@ -29,13 +29,13 @@ transform = transforms.Compose(
 )
 
 # Load Dataset
-train_dataset = SegmentationDataset(DATASET_PATH)
+train_dataset = unet.SegmentationDataset(DATASET_PATH)
 train_loader = DataLoader(
     train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=8, pin_memory=True
 )
 
 # Validation Dataset and Loader
-val_dataset = SegmentationDataset(
+val_dataset = unet.SegmentationDataset(
     DATASET_PATH.replace("train", "val")
 )  # Adjust path if needed
 val_loader = DataLoader(
@@ -49,7 +49,7 @@ scaler = torch.cuda.amp.GradScaler()
 writer = SummaryWriter(log_dir="./logs")
 
 # Initialize Model
-model = UNet(in_channels=3, out_channels=2).to(DEVICE)
+model = unet.UNet(in_channels=3, out_channels=2).to(DEVICE)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 

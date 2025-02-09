@@ -4,6 +4,7 @@ from torchvision import transforms
 import torch.optim as optim
 import torch.nn as nn
 import torch
+import time
 import os
 
 # Import U-Net and Dataset
@@ -43,7 +44,7 @@ val_loader = DataLoader(
 )
 
 # Initiate Scaler
-scaler = torch.cuda.amp.GradScaler()
+scaler = torch.cuda.amp.GradScaler(enabled=torch.cuda.is_available())
 
 # Initiate Write
 writer = SummaryWriter(log_dir="./logs")

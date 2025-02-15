@@ -44,7 +44,7 @@ val_loader = DataLoader(
 )
 
 # Initiate Scaler
-scaler = torch.cuda.amp.GradScaler(enabled=torch.cuda.is_available())
+scaler = torch.amp.GradScaler(enabled=torch.cuda.is_available())
 
 # Initiate Write
 writer = SummaryWriter(log_dir="./logs")
@@ -71,46 +71,47 @@ def validate(model, val_loader, criterion):
     return val_loss / len(val_loader)
 
 
-# Training Loop with Validation and Checkpoint Naming
-for epoch in range(EPOCHS):
-    model.train()
-    epoch_loss = 0
-    start_time = time.time()
+if __name__ == "__main__":
+    # Training Loop with Validation and Checkpoint Naming
+    for epoch in range(EPOCHS):
+        model.train()
+        epoch_loss = 0
+        start_time = time.time()
 
-    for images, masks in train_loader:
-        images, masks = images.to(DEVICE), masks.to(DEVICE)
+        for images, masks in train_loader:
+            images, masks = images.to(DEVICE), masks.to(DEVICE)
 
-        optimizer.zero_grad()
-        with torch.cuda.amp.autocast():  # Mixed precision
-            outputs = model(images)
-            loss = criterion(outputs, masks)
-        scaler.scale(loss).backward()
-        scaler.step(optimizer)
-        scaler.update()
+            optimizer.zero_grad()
+            with torch.cuda.amp.autocast():  # Mixed precision
+                outputs = model(images)
+                loss = criterion(outputs, masks)
+            scaler.scale(loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
 
-        epoch_loss += loss.item()
+            epoch_loss += loss.item()
 
-    avg_loss = epoch_loss / len(train_loader)
-    writer.add_scalar("Loss/train", avg_loss, epoch)
-    print(f"Epoch [{epoch+1}/{EPOCHS}], Training Loss: {avg_loss:.4f}")
+        avg_loss = epoch_loss / len(train_loader)
+        writer.add_scalar("Loss/train", avg_loss, epoch)
+        print(f"Epoch [{epoch+1}/{EPOCHS}], Training Loss: {avg_loss:.4f}")
 
-    # Validation Loop
-    val_loss = validate(model, val_loader, criterion)
-    writer.add_scalar("Loss/val", val_loss, epoch)
-    print(f"Validation Loss: {val_loss:.4f}")
+        # Validation Loop
+        val_loss = validate(model, val_loader, criterion)
+        writer.add_scalar("Loss/val", val_loss, epoch)
+        print(f"Validation Loss: {val_loss:.4f}")
 
-    # Save Checkpoint
-    if (epoch + 1) % 5 == 0:
-        checkpoint_path = os.path.join(SAVE_PATH, f"unet_epoch_{epoch + 1}.pth")
-        os.makedirs(os.path.dirname(checkpoint_path), exist_ok=True)
-        torch.save(model.state_dict(), checkpoint_path)
-        print(f"Checkpoint saved at {checkpoint_path}")
+        # Save Checkpoint
+        if (epoch + 1) % 5 == 0:
+            checkpoint_path = os.path.join(SAVE_PATH, f"unet_epoch_{epoch + 1}.pth")
+            os.makedirs(os.path.dirname(checkpoint_path), exist_ok=True)
+            torch.save(model.state_dict(), checkpoint_path)
+            print(f"Checkpoint saved at {checkpoint_path}")
 
-    # Update Learning Rate
-    scheduler.step()
+        # Update Learning Rate
+        scheduler.step()
 
-    epoch_time = time.time() - start_time
-    print(f"Epoch {epoch+1} completed in {epoch_time:.2f} seconds")
+        epoch_time = time.time() - start_time
+        print(f"Epoch {epoch+1} completed in {epoch_time:.2f} seconds")
 
-writer.close()
-print("Training Complete!")
+    writer.close()
+    print("Training Complete!")
